@@ -1,0 +1,42 @@
+package com.example.altproject.common;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum ErrorStatus {
+
+    // HTTP STATUS 200
+    SUCCESS("SU", "Success", HttpStatus.OK.value()),
+
+    // HTTP STATUS 400
+    VALIDATION_FAIL("VF", "Validation failed", HttpStatus.BAD_REQUEST.value()),
+    DUPLICATE_EMAIL("DE", "Duplicate email", HttpStatus.BAD_REQUEST.value()),
+    DUPLICATE_NICKNAME("DN", "Duplicate nickname", HttpStatus.BAD_REQUEST.value()),
+    DUPLICATE_TEL_NUMBER("DT", "Duplicate tel number", HttpStatus.BAD_REQUEST.value()),
+    NOT_EXISTED_USER("NU", "This user does not exist", HttpStatus.BAD_REQUEST.value()),
+    NOT_EXISTED_BOARD("NB", "This board does not exist", HttpStatus.BAD_REQUEST.value()),
+
+    // HTTP STATUS 401
+    SIGN_IN_FAIL("SF", "Login information mismatch", HttpStatus.UNAUTHORIZED.value()),
+    AUTHORIZATION_FAIL("AF", "Authorization failed", HttpStatus.UNAUTHORIZED.value()),
+
+    // HTTP STATUS 403
+    NO_PERMISSION("NP", "Do not have permission", HttpStatus.FORBIDDEN.value()),
+
+    // HTTP STATUS 500
+    SERVER_ERROR("SBE", "Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+
+    private final String code;
+    private final String description;
+    private final int httpStatus;
+
+
+
+}
+
+
