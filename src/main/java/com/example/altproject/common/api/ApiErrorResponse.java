@@ -1,4 +1,4 @@
-package com.example.altproject.dto;
+package com.example.altproject.common.api;
 
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;

@@ -1,7 +1,7 @@
 package com.example.altproject.exceptionhandler;
 
 import com.example.altproject.common.ErrorStatus;
-import com.example.altproject.dto.ApiErrorResponse;
+import com.example.altproject.common.api.ApiErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
