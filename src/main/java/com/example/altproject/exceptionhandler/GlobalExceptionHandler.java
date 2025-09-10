@@ -1,0 +1,24 @@
+package com.example.altproject.exceptionhandler;
+
+import com.example.altproject.common.ErrorStatus;
+import com.example.altproject.dto.ApiErrorResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+
+@Slf4j
+@RestControllerAdvice
+@Order(value = Integer.MAX_VALUE)
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ApiErrorResponse> execption(Exception exception){
+        log.error("GLOBAL EXCEPTION 발생 : ",exception);
+
+        return ResponseEntity.status(ErrorStatus.SERVER_ERROR.getHttpStatus()).body(ApiErrorResponse.GlobalError());
+    }
+
+}
