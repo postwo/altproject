@@ -9,12 +9,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ApiErrorResponse {
+public class ApiResponse {
     private String code;
     private String message;
     private int status;
 
-    public static ApiErrorResponse ApiError(ApiException apiException) {
+    public static ApiResponse ApiError(ApiException apiException) {
 
         var errorStatus = apiException.getErrorStatus();
 
@@ -22,7 +22,7 @@ public class ApiErrorResponse {
                 ? apiException.getErrorDescription()
                 : errorStatus.getDescription();
 
-        return ApiErrorResponse.builder()
+        return ApiResponse.builder()
                 .code(errorStatus.getCode())
                 .message(message)
                 .status(errorStatus.getHttpStatus())
@@ -30,11 +30,11 @@ public class ApiErrorResponse {
     }
 
 
-    public static ApiErrorResponse GlobalError() {
+    public static ApiResponse GlobalError() {
 
         var errorStatus = ErrorStatus.SERVER_ERROR;
 
-        return ApiErrorResponse.builder()
+        return ApiResponse.builder()
                 .code(errorStatus.getCode())
                 .message(errorStatus.getDescription())
                 .status(errorStatus.getHttpStatus())

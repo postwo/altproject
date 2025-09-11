@@ -2,7 +2,7 @@ package com.example.altproject.exceptionhandler;
 
 
 import com.example.altproject.common.exception.ApiException;
-import com.example.altproject.common.api.ApiErrorResponse;
+import com.example.altproject.common.api.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(value = ApiException.class)
-    public ResponseEntity<ApiErrorResponse> apiException(ApiException apiException){
+    public ResponseEntity<ApiResponse> apiException(ApiException apiException){
         log.error("apiException 발생:",apiException);
 
         var errorStatus = apiException.getErrorStatus();
 
 
-        return ResponseEntity.status(errorStatus.getHttpStatus()).body(ApiErrorResponse.ApiError(apiException));
+        return ResponseEntity.status(errorStatus.getHttpStatus()).body(ApiResponse.ApiError(apiException));
     }
 }

@@ -1,7 +1,7 @@
 package com.example.altproject.exceptionhandler;
 
 import com.example.altproject.common.ErrorStatus;
-import com.example.altproject.common.api.ApiErrorResponse;
+import com.example.altproject.common.api.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<ApiErrorResponse> execption(Exception exception){
+    public ResponseEntity<ApiResponse> execption(Exception exception){
         log.error("GLOBAL EXCEPTION 발생 : ",exception);
 
-        return ResponseEntity.status(ErrorStatus.SERVER_ERROR.getHttpStatus()).body(ApiErrorResponse.GlobalError());
+        return ResponseEntity.status(ErrorStatus.SERVER_ERROR.getHttpStatus()).body(ApiResponse.GlobalError());
     }
 
 }
