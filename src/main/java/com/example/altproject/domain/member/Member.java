@@ -1,6 +1,6 @@
 package com.example.altproject.domain.member;
 
-import com.example.altproject.domain.member.status.UserStatus;
+import com.example.altproject.domain.member.status.MemberRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -10,12 +10,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Getter
 @Builder
-@ToString
+@ToString(exclude = "memberRoleList")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -35,12 +37,15 @@ public class Member {
     @Column(length = 50 ,nullable = false)
     private String nickname;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(length = 30 ,nullable = false)
-    private UserStatus role;
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Column(length = 150 )
     private String address;
+
+    private boolean social;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -66,12 +71,24 @@ public class Member {
         return Objects.hashCode(id);
     }
 
+    public void addRole(MemberRole role) {
+        memberRoleList.add(role);
+    }
+
+    public void clearRole() {
+        memberRoleList.clear();
+    }
+
+    public void changeSocial(boolean social) {
+        this.social = social;
+    }
+
     public static Member createMember(String email, String encodedPassword, String nickname) {
         return Member.builder()
                 .email(email)
                 .password(encodedPassword)
                 .nickname(nickname)
-                .role(UserStatus.USER)
+                .memberRoleList(new ArrayList<>(List.of(MemberRole.USER)))
                 .build();
     }
 }

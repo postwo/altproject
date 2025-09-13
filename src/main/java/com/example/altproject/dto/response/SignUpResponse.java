@@ -1,10 +1,11 @@
 package com.example.altproject.dto.response;
 
 import com.example.altproject.domain.member.Member;
-import com.example.altproject.domain.member.status.UserStatus;
+import com.example.altproject.domain.member.status.MemberRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ public class SignUpResponse {
     private Long id;
     private String email;
     private String nickname;
-    private UserStatus role;
+    private List<MemberRole> roles;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
@@ -24,7 +25,7 @@ public class SignUpResponse {
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
-                .role(member.getRole())
+                .roles(member.getMemberRoleList())
                 .createdAt(member.getCreatedAt())
                 .modifiedAt(member.getModifiedAt())
                 .build();

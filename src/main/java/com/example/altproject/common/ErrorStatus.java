@@ -16,13 +16,14 @@ public enum ErrorStatus {
     VALIDATION_FAIL("VF", "Validation failed", HttpStatus.BAD_REQUEST.value()),
     DUPLICATE_EMAIL("DE", "Duplicate email", HttpStatus.BAD_REQUEST.value()),
     DUPLICATE_NICKNAME("DN", "Duplicate nickname", HttpStatus.BAD_REQUEST.value()),
-    DUPLICATE_TEL_NUMBER("DT", "Duplicate tel number", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_USER("NU", "This user does not exist", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_BOARD("NB", "This board does not exist", HttpStatus.BAD_REQUEST.value()),
 
     // HTTP STATUS 401
     SIGN_IN_FAIL("SF", "Login information mismatch", HttpStatus.UNAUTHORIZED.value()),
     AUTHORIZATION_FAIL("AF", "Authorization failed", HttpStatus.UNAUTHORIZED.value()),
+    INVALID_TOKEN("IT", "Invalid or expired JWT token", HttpStatus.UNAUTHORIZED.value()),
+    PASSWORD_MISMATCH("PM", "Password does not match", HttpStatus.UNAUTHORIZED.value()),
 
     // HTTP STATUS 403
     NO_PERMISSION("NP", "Do not have permission", HttpStatus.FORBIDDEN.value()),
