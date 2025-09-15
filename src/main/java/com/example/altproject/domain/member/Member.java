@@ -38,8 +38,13 @@ public class Member {
     private String nickname;
 
     @Builder.Default
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "member_roles",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Column(length = 150 )
