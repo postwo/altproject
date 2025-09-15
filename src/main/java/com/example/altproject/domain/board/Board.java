@@ -1,20 +1,22 @@
 package com.example.altproject.domain.board;
 
 import com.example.altproject.common.auditing.AuditingFields;
+import com.example.altproject.domain.hashtag.HashTag;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Entity
 @Builder
 @ToString(callSuper = true)
 @Table(indexes = {
-        @Index(columnList = "title"),
-        @Index(columnList = "content")
+        @Index(columnList = "title")
 })
 public class Board extends AuditingFields {
 
@@ -22,14 +24,25 @@ public class Board extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 255)
     private String title;
 
+    @Lob
     private String content;
 
     private int favoriteCount;
 
     private int viewCount;
 
+    @Builder.Default
+    @ToString.Exclude
+    @JoinTable(
+            name = "board_hashtag",
+            joinColumns = @JoinColumn(name = "board_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
+    )
+    @ManyToMany(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<HashTag> hashtags = new LinkedHashSet<>();
 
 
     public void increaseViewCount() {
