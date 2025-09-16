@@ -1,4 +1,4 @@
-package com.example.altproject.service;
+package com.example.altproject.service.security;
 
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
