@@ -18,6 +18,7 @@ public enum ErrorStatus {
     DUPLICATE_NICKNAME("DN", "Duplicate nickname", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_USER("NU", "This user does not exist", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_BOARD("NB", "This board does not exist", HttpStatus.BAD_REQUEST.value()),
+    UNSUPPORTED_OAUTH_PROVIDER("UP", "Unsupported OAuth2 Provider", HttpStatus.BAD_REQUEST.value()),
 
     // HTTP STATUS 401
     SIGN_IN_FAIL("SF", "Login information mismatch", HttpStatus.UNAUTHORIZED.value()),

@@ -31,7 +31,7 @@ public class Member {
     @Column(length = 100 ,nullable = false)
     private String email;
 
-    @Column(length = 255 ,nullable = false)
+    @Column(length = 255 )
     private String password;
 
     @Column(length = 50 ,nullable = false)
@@ -51,6 +51,8 @@ public class Member {
     private String address;
 
     private boolean social;
+
+    private String socialUsername;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -94,6 +96,17 @@ public class Member {
                 .password(encodedPassword)
                 .nickname(nickname)
                 .memberRoleList(new ArrayList<>(List.of(MemberRole.USER)))
+                .build();
+    }
+
+    public static Member createSocialMember(String email, String nickname , String socialUsername) {
+        return Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(null)
+                .socialUsername(socialUsername)
+                .memberRoleList(new ArrayList<>(List.of(MemberRole.USER)))
+                .social(true)
                 .build();
     }
 }
