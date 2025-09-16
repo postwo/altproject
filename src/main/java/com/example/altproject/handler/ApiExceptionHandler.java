@@ -1,4 +1,4 @@
-package com.example.altproject.exceptionhandler;
+package com.example.altproject.handler;
 
 
 import com.example.altproject.common.exception.ApiException;

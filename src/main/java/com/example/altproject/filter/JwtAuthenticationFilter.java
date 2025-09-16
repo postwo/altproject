@@ -1,6 +1,6 @@
 package com.example.altproject.filter;
 
-import com.example.altproject.service.CustomUserDetailsService;
+import com.example.altproject.service.security.CustomUserDetailsService;
 import com.example.altproject.util.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
