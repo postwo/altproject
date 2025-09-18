@@ -1,5 +1,6 @@
 package com.example.altproject.filter;
 
+import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.service.security.CustomUserDetailsService;
 import com.example.altproject.util.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
+        try {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             String email = jwtTokenProvider.getEmailFromToken(token);
 
@@ -44,7 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         }
         filterChain.doFilter(request, response);
-
+        } catch (ApiException e) {
+            // ✅ 토큰 만료 or 유효하지 않은 토큰
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            // 🔥 여기서 return 해줘야 interceptor로 401 전달됨
+        }
     }
 
     private String resolveToken(HttpServletRequest request) {
