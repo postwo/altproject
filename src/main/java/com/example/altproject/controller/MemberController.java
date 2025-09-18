@@ -30,9 +30,9 @@ public class MemberController {
         return ApiResponse.Success(response);
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ApiResponse<SignInResponse> signIn(@RequestBody @Valid SignInRequest request, HttpServletResponse response) {
-        SignInResponse tokens = memberService.signIn(request);
+        SignInResponse tokens = memberService.login(request);
 
         Cookie refreshCookie = new Cookie("refreshToken", tokens.getRefreshToken());
         refreshCookie.setHttpOnly(true);

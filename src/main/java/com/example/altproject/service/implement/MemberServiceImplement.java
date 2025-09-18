@@ -13,6 +13,7 @@ import com.example.altproject.util.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MemberServiceImplement implements MemberService {
 
@@ -53,21 +55,10 @@ public class MemberServiceImplement implements MemberService {
         return response;
     }
 
-    private String createAccessToken(Member member) {
-        List<String> roles = member.getMemberRoleList().stream()
-                .map(Enum::name)
-                .toList();
-
-        return jwtTokenProvider.generateAccessToken(member.getEmail(), roles);
-    }
-
-
     @Override
     @Transactional
-    public SignInResponse signIn(SignInRequest request) {
-
+    public SignInResponse login(SignInRequest request) {
         Member user = memberRepository.getWithRoles(request.getEmail()).orElseThrow(()->new ApiException(ErrorStatus.NOT_EXISTED_USER));
-
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ApiException(ErrorStatus.PASSWORD_MISMATCH);
@@ -80,7 +71,15 @@ public class MemberServiceImplement implements MemberService {
         values.set(user.getEmail(),refreshToken, Duration.ofDays(7));
 
         return new SignInResponse(accessToken,refreshToken);
+    }
 
+
+    private String createAccessToken(Member member) {
+        List<String> roles = member.getMemberRoleList().stream()
+                .map(Enum::name)
+                .toList();
+
+        return jwtTokenProvider.generateAccessToken(member.getEmail(), roles);
     }
 
     @Override

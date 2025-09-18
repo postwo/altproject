@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface MemberService {
 
     SignUpResponse signUp(SignUpRequest request);
-    SignInResponse signIn(SignInRequest request);
+    SignInResponse login(SignInRequest request);
 
 //    SignInResponse refresh(String token);
 
