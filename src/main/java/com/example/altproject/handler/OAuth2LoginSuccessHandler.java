@@ -4,28 +4,28 @@ import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.member.Member;
 import com.example.altproject.repository.MemberRepository;
+import com.example.altproject.service.oauth.CustomOAuth2User;
 import com.example.altproject.util.JwtTokenProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -37,18 +37,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        // CustomOAuth2User로 캐스팅
+        CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        String registrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
-        String email;
-        if ("kakao".equals(registrationId)) {
-            Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
-            email = (String) kakaoAccount.get("email");
-        } else if ("google".equals(registrationId)) {
-            email = oAuth2User.getAttribute("email");
-        } else {
-            throw new RuntimeException("지원하지 않는 OAuth Provider");
-        }
+        // oAuth2User.getAttributes() 안에 email이 이미 있음
+        String email = customOAuth2User.getEmail();
+        if (email == null) throw new RuntimeException("OAuth2 로그인 이메일 없음");
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"사용자 없음"));
@@ -67,9 +61,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
         response.addCookie(refreshCookie);
 
-        response.setContentType("application/json;charset=UTF-8");
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put("accessToken", accessToken);
-        new ObjectMapper().writeValue(response.getWriter(), tokenMap);
+        // 프론트로 accessToken 전달
+        // 이거는 프론트 포트 번호와 토큰값만 추가 해서 보내면 된다
+        response.sendRedirect("http://localhost:5173/oauth2/callback/kakao?accessToken="+ accessToken);
     }
 }
