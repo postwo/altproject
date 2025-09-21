@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // CustomOAuth2User로 캐스팅
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
+        // OAuth2AuthenticationToken을 사용하여 프로바이더(제공자) 이름 가져오기
+        String provider;
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            // 등록된 클라이언트의 ID, 즉 'google' 또는 'kakao'를 가져옵니다.
+            provider = oauthToken.getAuthorizedClientRegistrationId();
+        } else {
+            // OAuth2 인증이 아닐 경우 예외 처리
+            throw new IllegalArgumentException("OAuth2AuthenticationToken이 아닙니다.");
+        }
+
         // oAuth2User.getAttributes() 안에 email이 이미 있음
         String email = customOAuth2User.getEmail();
         if (email == null) throw new RuntimeException("OAuth2 로그인 이메일 없음");
@@ -61,8 +73,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
         response.addCookie(refreshCookie);
 
-        // 프론트로 accessToken 전달
-        // 이거는 프론트 포트 번호와 토큰값만 추가 해서 보내면 된다
-        response.sendRedirect("http://localhost:5173/oauth2/callback/kakao?accessToken="+ accessToken);
+        // 프로바이더에 따라 동적으로 리디렉션 URL 생성
+        String redirectUrl = "http://localhost:5173/oauth2/callback/" + provider + "?accessToken=" + accessToken;
+        response.sendRedirect(redirectUrl);
     }
 }

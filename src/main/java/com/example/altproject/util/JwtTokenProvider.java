@@ -18,14 +18,12 @@ public class JwtTokenProvider {
 
     private final Key key;
 
-    private final long expiration = 1000L * 60 * 60 ;
-
     public JwtTokenProvider(@Value("${spring.jwt.secret-key}") String secretKey) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken (String email, List<String> roles){
-        long expiration_30m = 1000L * 60 * 30;
+        long expiration_30m = 1000L * 60 * 60;
 
         return Jwts.builder()
                 .setSubject(email)
