@@ -2,10 +2,9 @@ package com.example.altproject.domain.board;
 
 import com.example.altproject.common.auditing.AuditingFields;
 import com.example.altproject.domain.hashtag.HashTag;
+import com.example.altproject.dto.request.BoardRequest;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -18,6 +17,8 @@ import java.util.Set;
 @Table(indexes = {
         @Index(columnList = "title")
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class Board extends AuditingFields {
 
     @Id
@@ -33,6 +34,8 @@ public class Board extends AuditingFields {
     private int favoriteCount;
 
     private int viewCount;
+
+    private String writerEmail;
 
     @Builder.Default
     @ToString.Exclude
@@ -69,5 +72,17 @@ public class Board extends AuditingFields {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public static Board create(BoardRequest request){
+        return Board.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
+    }
+
+    public void update(BoardRequest request) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
     }
 }

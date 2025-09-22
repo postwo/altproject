@@ -1,12 +1,8 @@
 package com.example.altproject.domain.hashtag;
 
-import com.example.altproject.common.auditing.AuditingFields;
 import com.example.altproject.domain.board.Board;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -18,10 +14,10 @@ import java.util.Set;
 @ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList = "hashtagName", unique = true),
-        @Index(columnList = "createdAt"),
-        @Index(columnList = "createdBy")
 })
-public class HashTag extends AuditingFields {
+@NoArgsConstructor
+@AllArgsConstructor
+public class HashTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
