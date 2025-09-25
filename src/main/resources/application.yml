@@ -1,0 +1,58 @@
+spring:
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${db}
+    username: ${user}
+    password: ${pw}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+    show-sql: true
+
+  jwt:
+    secret-key: ${key}
+
+  file:
+    path: C:/app사진/
+    url: http://localhost:8080/file/
+
+  redis:
+    host: localhost
+    port: 6379
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: ${google-client-id}
+            client-secret: ${google-client-secret}
+            redirect-uri: http://localhost:8080/oauth2/callback/google
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+
+          kakao:
+            client-id: ${kid}
+            client-secret: ${kpw}
+            redirect-uri: http://localhost:8080/oauth2/callback/kakao
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+              - profile_nickname
+              - account_email
+            provider: kakao
+
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
