@@ -21,6 +21,7 @@ public class BoardResponse {
     private int viewCount;
     private Set<String> hashtags;
 
+
     public static BoardResponse createResponse(Board board) {
         return BoardResponse.builder()
                 .id(board.getId())

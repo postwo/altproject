@@ -2,13 +2,13 @@ package com.example.altproject.domain.board;
 
 import com.example.altproject.common.auditing.AuditingFields;
 import com.example.altproject.domain.hashtag.HashTag;
+import com.example.altproject.domain.image.Image;
+import com.example.altproject.domain.member.Member;
 import com.example.altproject.dto.request.BoardRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Entity
@@ -47,6 +47,12 @@ public class Board extends AuditingFields {
     @ManyToMany(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<HashTag> hashtags = new LinkedHashSet<>();
 
+    //orphanRemoval 부모 엔티티(게시글)는 그대로 남겨둔 채, 부모와의 관계가 끊어진 자식 엔티티(이미지)만 데이터베이스에서 삭제할 때 사용
+    @Builder.Default
+    @ToString.Exclude
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
+
 
     public void increaseViewCount() {
         this.viewCount ++;
@@ -74,10 +80,11 @@ public class Board extends AuditingFields {
         return Objects.hashCode(id);
     }
 
-    public static Board create(BoardRequest request){
+    public static Board create(BoardRequest request, Member author){
         return Board.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .writerEmail(author.getEmail())
                 .build();
     }
 

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
 
     private final MemberRepository memberRepository;
@@ -71,4 +71,5 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         return  new CustomOAuth2User(oAuth2User, email, nickname,authorities);
     }
+
 }
