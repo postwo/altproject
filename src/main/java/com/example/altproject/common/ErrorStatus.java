@@ -19,6 +19,10 @@ public enum ErrorStatus {
     NOT_EXISTED_USER("NU", "This user does not exist", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_BOARD("NB", "This board does not exist", HttpStatus.BAD_REQUEST.value()),
     UNSUPPORTED_OAUTH_PROVIDER("UP", "Unsupported OAuth2 Provider", HttpStatus.BAD_REQUEST.value()),
+    EMPTY_FILE("FE", "File is empty", HttpStatus.BAD_REQUEST.value()),
+    INVALID_FILE_NAME("FI", "Invalid file name", HttpStatus.BAD_REQUEST.value()),
+    NOT_EXISTED_FILE("FN", "File does not exist or is not readable", HttpStatus.BAD_REQUEST.value()),
+
 
     // HTTP STATUS 401
     SIGN_IN_FAIL("SF", "Login information mismatch", HttpStatus.UNAUTHORIZED.value()),
@@ -30,6 +34,9 @@ public enum ErrorStatus {
     NO_PERMISSION("NP", "Do not have permission", HttpStatus.FORBIDDEN.value()),
 
     // HTTP STATUS 500
+    FILE_UPLOAD_FAILED("FUF", "File upload failed due to I/O error", HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    FILE_DELETE_FAILED("FDF", "File delete failed due to permission or I/O error", HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    INVALID_FILE_PATH("FIP", "File path creation error", HttpStatus.INTERNAL_SERVER_ERROR.value()),
     SERVER_ERROR("SBE", "Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value());
 
 
