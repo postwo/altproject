@@ -2,7 +2,10 @@ package com.example.altproject.domain.image;
 
 import com.example.altproject.domain.board.Board;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Objects;
 
@@ -18,10 +21,15 @@ public class Image {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
+    @JoinColumn(name = "board_id") // DB 외래 키 컬럼 이름 명시
     private Board board;
 
     private String image;
+
+    public Image(Board board, String image) {
+        this.board = board;
+        this.image = image;
+    }
 
 
     @Override

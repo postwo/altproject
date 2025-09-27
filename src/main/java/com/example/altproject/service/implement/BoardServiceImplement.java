@@ -5,6 +5,7 @@ import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.board.Board;
 import com.example.altproject.domain.hashtag.HashTag;
+import com.example.altproject.domain.image.Image;
 import com.example.altproject.domain.member.Member;
 import com.example.altproject.dto.request.BoardRequest;
 import com.example.altproject.dto.response.BoardResponse;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,8 +29,6 @@ public class BoardServiceImplement implements BoardService {
     private final BoardRepository boardRepository;
     private final HashTagRepository hashTagRepository;
     private final AuthUtil authUtil;
-
-
 
 
     @Override
@@ -52,6 +52,14 @@ public class BoardServiceImplement implements BoardService {
             board.getHashtags().addAll(hashtags);
         }
 
+        if (request.getBoardImageList() != null && !request.getBoardImageList().isEmpty()) {
+            List<Image> imageEntities = request.getBoardImageList().stream()
+                    .map(imageUrl -> new Image(board, imageUrl))
+                    .collect(Collectors.toList());
+
+            board.getImages().addAll(imageEntities);
+        }
+
         boardRepository.save(board);
 
         return BoardResponse.createResponse(board);
@@ -59,17 +67,14 @@ public class BoardServiceImplement implements BoardService {
 
     @Override
     @Transactional
-    public BoardResponse updateBoard(Long boardId, BoardRequest request, Object principal) {
+    public BoardResponse patchBoard(Long boardId, BoardRequest request, Object principal) {
 
         String email = authUtil.getEmail(principal);
 
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD,"해당 게시글이 존재하지 않습니다. "));
 
-        if (!board.getWriterEmail().equals(email)) {
-            // 권한이 없는 경우 예외를 발생시킵니다.
-            throw new ApiException(ErrorStatus.NO_PERMISSION,"게시글을 수정할 권한이 없습니다.");
-        }
+        validateWriter(board, email);
 
         board.update(request);
 
@@ -85,8 +90,46 @@ public class BoardServiceImplement implements BoardService {
             board.getHashtags().addAll(newHashtags);
         }
 
+        if (request.getBoardImageList() != null) {
+            List<Image> imageEntities = request.getBoardImageList().stream()
+                    .map(imageUrl -> new Image(board, imageUrl))
+                    .collect(Collectors.toList());
+
+            board.getImages().clear();
+            board.getImages().addAll(imageEntities);
+        }
+
         boardRepository.save(board);
 
         return BoardResponse.updateResponse(board);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BoardResponse getBoard(Long boardId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다."));
+
+        return BoardResponse.getResponse(board);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBoard(Long boardId, Object principal) {
+        String email = authUtil.getEmail(principal);
+
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다."));
+
+        validateWriter(board, email);
+
+        boardRepository.delete(board);
+    }
+
+
+    private void validateWriter(Board board, String email) {
+        if (!board.getWriterEmail().equals(email)) {
+            throw new ApiException(ErrorStatus.NO_PERMISSION, "게시글을 수정,삭제할 권한이 없습니다.");
+        }
     }
 }

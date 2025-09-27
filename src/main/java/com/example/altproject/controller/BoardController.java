@@ -26,10 +26,23 @@ public class BoardController {
         return ApiResponse.Success(response);
     }
 
-    @PutMapping("/update/{boardId}")
+    @PatchMapping("/update/{boardId}")
     public ApiResponse<BoardResponse> updateBoard(@PathVariable Long boardId, @RequestBody BoardRequest dto, @AuthenticationPrincipal Object principal) {
-        BoardResponse response = boardService.updateBoard(boardId, dto,principal);
+        BoardResponse response = boardService.patchBoard(boardId, dto,principal);
         return ApiResponse.Success(response);
+    }
+
+    @GetMapping("/{boardId}")
+    public ApiResponse<BoardResponse> getBoard(@PathVariable Long boardId) {
+        BoardResponse response = boardService.getBoard(boardId);
+        return ApiResponse.Success(response);
+    }
+
+    @DeleteMapping("/delete/{boardId}")
+    public ApiResponse<String> deleteBoard(@PathVariable Long boardId,
+                                           @AuthenticationPrincipal Object principal) {
+        boardService.deleteBoard(boardId, principal);
+        return ApiResponse.Success("게시글이 성공적으로 삭제되었습니다.");
     }
 
 

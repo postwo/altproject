@@ -14,7 +14,8 @@ public class ImageController {
 
     private final ImageService imageService;
 
-    //게시글 에 있는 이미지와 프로필 이미지 저장
+    //게시글 에 있는 이미지와 프로필 이미지 저장(form-data)
+    // key 값으 file 이다
     @PostMapping("/upload")
     public String upload(
             @RequestParam("file") MultipartFile file

@@ -1,11 +1,13 @@
 package com.example.altproject.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -21,4 +23,7 @@ public class BoardRequest {
     private String content;
 
     private Set<String> hashtags;
+
+    @NotNull
+    private List<String> boardImageList;
 }
