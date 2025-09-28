@@ -39,7 +39,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth-> auth
-                        .requestMatchers("/api/member/**","/api/board/**","/test/**","/oauth2/**","/file/**").permitAll()
+                        .requestMatchers("/api/member/**","/api/board/**"
+                                ,"/test/**","/oauth2/**","/file/**" ,"/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/private/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().denyAll())
