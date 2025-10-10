@@ -132,4 +132,15 @@ public class BoardServiceImplement implements BoardService {
             throw new ApiException(ErrorStatus.NO_PERMISSION, "게시글을 수정,삭제할 권한이 없습니다.");
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getLatestBoardList() {
+        List<Board> latestBoards = boardRepository.findAllWithDetails();
+
+        List<BoardResponse> responseList = latestBoards.stream()
+                .map(BoardResponse::getResponse)
+                .collect(Collectors.toList());
+        return responseList;
+    }
 }
