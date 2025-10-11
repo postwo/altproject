@@ -1,3 +1,6 @@
+# use case
+![알뜰모아 최종 유즈케이스.jpg](image%2F%EC%95%8C%EB%9C%B0%EB%AA%A8%EC%95%84%20%EC%B5%9C%EC%A2%85%20%EC%9C%A0%EC%A6%88%EC%BC%80%EC%9D%B4%EC%8A%A4.jpg)
+
 swagger 젒고 경로
 http://localhost:8080/swagger-ui/index.html
 
