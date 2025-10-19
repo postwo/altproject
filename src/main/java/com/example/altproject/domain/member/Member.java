@@ -47,9 +47,6 @@ public class Member {
     )
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
-    @Column(length = 150 )
-    private String address;
-
     private boolean social;
 
     private String socialUsername;
