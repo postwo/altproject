@@ -13,5 +13,6 @@ public interface BoardService {
     void deleteBoard(Long boardId, Object principal);
 
     List<BoardResponse> getLatestBoardList();
+    BoardResponse boardDetail(Long boardId);
 }
 

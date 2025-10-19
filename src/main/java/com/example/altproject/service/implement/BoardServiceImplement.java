@@ -143,4 +143,32 @@ public class BoardServiceImplement implements BoardService {
                 .collect(Collectors.toList());
         return responseList;
     }
+
+    // 게시글 상세보기
+    @Override
+    @Transactional // 조회수 증가(쓰기 작업)가 필요하므로 @Transactional을 유지합니다.
+    public BoardResponse boardDetail(Long boardId) {
+
+        System.out.println("나까지 왔어");
+
+        // 1. 게시글 조회
+        // Lazy Loading으로 인한 N+1 문제를 방지하기 위해 Fetch Join을 사용하는 BoardRepository 메서드를 사용하는 것이 일반적입니다.
+        // 현재 BoardRepository에 @EntityGraph가 정의된 findAllWithDetails()만 있으므로,
+        // findById()를 사용하되 N+1 문제를 감안하거나 (임시 방편), 상세 조회용 Fetch Join 쿼리를 추가해야 합니다.
+
+        Board board = boardRepository.findByIdWithDetails(boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다. Board ID: " + boardId));
+
+        // 2. 조회수 증가
+        board.increaseViewCount();
+        // save를 명시하지 않아도 @Transactional에 의해 변경 감지(Dirty Checking)가 작동하여 DB에 반영됩니다.
+
+        // 3. 응답 DTO 반환 (게시글 엔티티를 DTO로 변환)
+        return BoardResponse.getResponse(board);
+    }
+
+
+
+
+
 }
