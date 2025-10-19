@@ -21,6 +21,7 @@ public class BoardController {
     private final BoardService boardService;
     private final AuthUtil authUtil;
 
+    // 게시글 작성
     @PostMapping("/create")
     public ApiResponse<BoardResponse> createBoard(@RequestBody BoardRequest dto, @AuthenticationPrincipal Object principal) {
 
@@ -28,12 +29,14 @@ public class BoardController {
         return ApiResponse.Success(response);
     }
 
+    // 게시글 수정
     @PatchMapping("/update/{boardId}")
     public ApiResponse<BoardResponse> updateBoard(@PathVariable Long boardId, @RequestBody BoardRequest dto, @AuthenticationPrincipal Object principal) {
         BoardResponse response = boardService.patchBoard(boardId, dto,principal);
         return ApiResponse.Success(response);
     }
 
+    // 특정 게시물
     @GetMapping("/{boardId}")
     public ApiResponse<BoardResponse> getBoard(@PathVariable Long boardId) {
         BoardResponse response = boardService.getBoard(boardId);
@@ -47,12 +50,20 @@ public class BoardController {
         return ApiResponse.Success("게시글이 성공적으로 삭제되었습니다.");
     }
 
-
+    // 전체 게시물 리스트
     @GetMapping("/latest-list")
     public ApiResponse<List<BoardResponse>> getLatestBoardList() {
         List<BoardResponse> response = boardService.getLatestBoardList();
         return ApiResponse.Success(response);
     }
+
+    @GetMapping("/detail/{boardId}")
+    public ApiResponse<BoardResponse> BoardDetail(@PathVariable Long boardId){
+        System.out.println("요청왔어");
+        BoardResponse response = boardService.boardDetail(boardId);
+        return ApiResponse.Success(response);
+    }
+
 
 
 
