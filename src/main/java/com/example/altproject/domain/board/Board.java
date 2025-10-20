@@ -31,6 +31,12 @@ public class Board extends AuditingFields {
     @Lob
     private String content;
 
+    private int totalPrice;
+
+    private String address;
+
+    private int maxParticipants;
+
     private int favoriteCount;
 
     private int viewCount;
@@ -83,6 +89,8 @@ public class Board extends AuditingFields {
     public static Board create(BoardRequest request, Member author){
         return Board.builder()
                 .title(request.getTitle())
+                .address(request.getAddress())
+                .totalPrice(request.getTotalPrice())
                 .content(request.getContent())
                 .writerEmail(author.getEmail())
                 .build();

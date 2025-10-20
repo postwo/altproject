@@ -24,6 +24,12 @@ public class BoardRequest {
 
     private Set<String> hashtags;
 
+    private String address;
+
+    private int totalPrice;
+
+    private int maxParticipants;
+
     @NotNull
     private List<String> boardImageList;
 }
