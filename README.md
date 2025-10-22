@@ -1,3 +1,88 @@
+# 다이어그램 확인 방법
+1. GitHub에서 보기
+   파일을 커밋하고 GitHub에 푸시하면 Mermaid 다이어그램이 자동으로 렌더링됩니다.
+2. IntelliJ IDEA에서 보기
+   IntelliJ에 Mermaid 플러그인 설치:
+   Settings → Plugins → "Mermaid" 검색 → 설치
+   파일을 열면 미리보기가 가능합니다.
+3. VS Code에서 보기
+   Markdown Preview Mermaid Support 확장 설치
+   Ctrl+Shift+V로 미리보기
+
+
+# 아키텍처 다이어그램 확인사이트
+https://mermaid.live/edit#pako:eNpVjbFugzAQhl_FuqmVSISdAImHSg1ps0Rqh0yFDCdwMEqwkTFKU-Dda4iqtjfd6fv-_zrIdC6Aw-mir5lEY8lhmyri5jmJpSkbW2FzJLPZU78TllRaiVtPNg87TRqp67pUxePd34wSibv9qAliZanOwx3FU_5NiZ5skz3WVtfHv-Rw1T15Scp36er_E2mES70mJ-QnnGVoSIxmUsCDwpQ5cGta4UElTIXjCd1IU7BSVCIF7tYczTmFVA0uU6P60Lr6iRndFhJc96VxV1vnaMW2xMLgryJULkysW2WBMzZVAO_gE_hixeZhGEQBXS9XfsSoBzfgYTiPoiDwQ0p9uvYpGzz4mn768xX1F8GC0WUUsZAxOnwDJDp1Uw
+
+# 확인사이트에서 이거 붙여 넣기 
+graph TB
+subgraph Client["Client"]
+WEB["🌐 Web Browser"]
+MOBILE["📱 Mobile App"]
+end
+
+    WEB --> |"HTTP Request"| CONTROLLER
+    MOBILE --> |"REST API"| CONTROLLER
+
+    subgraph Backend["Spring Boot Application"]
+        CONTROLLER["🎮 Controllers<br/>(MemberController,<br/>BoardController)"]
+        
+        subgraph Services["Service Layer"]
+            MEMBER_S["👤 Member Service"]
+            BOARD_S["📝 Board Service"]
+            IMAGE_S["🖼️ Image Service"]
+        end
+        
+        CONTROLLER --> |"Business Logic"| MEMBER_S
+        CONTROLLER --> |"Business Logic"| BOARD_S
+        BOARD_S --> |"Upload/Delete"| IMAGE_S
+        
+        subgraph Repositories["Repository Layer"]
+            MEMBER_R["MemberRepository"]
+            BOARD_R["BoardRepository"]
+            IMAGE_R["ImageRepository"]
+        end
+        
+        MEMBER_S --> |"Data Access"| MEMBER_R
+        BOARD_S --> |"Data Access"| BOARD_R
+        IMAGE_S --> |"Data Access"| IMAGE_R
+    end
+
+    subgraph Security["🔒 Security Layer"]
+        JWT["JWT Filter"]
+        OAUTH["OAuth2 Handler"]
+    end
+
+    CONTROLLER -.-> |"Authentication"| JWT
+    CONTROLLER -.-> |"Social Login"| OAUTH
+
+    subgraph Storage["Data Storage"]
+        DB[("💾 RDBMS<br/>(MySQL/PostgreSQL)")]
+        REDIS[("⚡ Redis<br/>(Cache & Session)")]
+        FILE["📁 File Storage<br/>(Images)"]
+    end
+
+    MEMBER_R --> |"Save/Find User"| DB
+    BOARD_R --> |"Save/Find Board"| DB
+    IMAGE_R --> |"Save Metadata"| DB
+    IMAGE_S --> |"Upload Files"| FILE
+    
+    MEMBER_S --> |"일반 로그인<br/>Token Store"| REDIS
+    OAUTH --> |"소셜 로그인<br/>Token Store"| REDIS
+    
+    subgraph Admin["관리자"]
+        ADMIN["👨‍💼 Admin"]
+    end
+    
+    ADMIN --> |"Manage Users/Posts"| CONTROLLER
+
+    style Client fill:#e3f2fd
+    style Backend fill:#f3e5f5
+    style Security fill:#ffebee
+    style Storage fill:#e8f5e9
+    style Admin fill:#fff3e0
+
+# 여기 코드에 대해 예를 만들어서 설며해줘
+
 # use case
 ![알뜰모아 최종 유즈케이스.jpg](image%2F%EC%95%8C%EB%9C%B0%EB%AA%A8%EC%95%84%20%EC%B5%9C%EC%A2%85%20%EC%9C%A0%EC%A6%88%EC%BC%80%EC%9D%B4%EC%8A%A4.jpg)
 
