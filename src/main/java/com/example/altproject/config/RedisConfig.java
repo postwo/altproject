@@ -27,11 +27,6 @@ public class RedisConfig {
         return new LettuceConnectionFactory(host, port);
     }
 
-    @Bean
-    public StringRedisTemplate stringRedisTemplate() {
-        return new StringRedisTemplate(redisConnectionFactory());
-    }
-
     //    redis 연결기본객체
     //Redis 서버에 연결하기 위한 팩토리
     @Bean
