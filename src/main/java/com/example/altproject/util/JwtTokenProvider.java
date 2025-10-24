@@ -4,11 +4,11 @@ import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +19,8 @@ public class JwtTokenProvider {
     private final Key key;
 
     public JwtTokenProvider(@Value("${spring.jwt.secret-key}") String secretKey) {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        // 💡 수정된 부분: Base64로 인코딩된 secretKey를 Decoders.BASE64로 디코딩합니다.
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
     public String generateAccessToken (String email, List<String> roles){
