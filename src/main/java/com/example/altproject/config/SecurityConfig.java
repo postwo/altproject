@@ -41,7 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth-> auth
                         .requestMatchers("/api/member/**","/api/board/**"
                                 ,"/test/**","/oauth2/**","/file/**" ,"/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+                        // ⭐️ STOMP 엔드포인트 경로를 명시적으로 허용합니다. (SockJS 경로 포함)
+                        .requestMatchers("/connect/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/private/**","/chat/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().denyAll())

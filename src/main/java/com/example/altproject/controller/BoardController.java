@@ -57,6 +57,7 @@ public class BoardController {
         return ApiResponse.Success(response);
     }
 
+    // 게시물 상세보기
     @GetMapping("/detail/{boardId}")
     public ApiResponse<BoardResponse> BoardDetail(@PathVariable Long boardId){
         BoardResponse response = boardService.boardDetail(boardId);

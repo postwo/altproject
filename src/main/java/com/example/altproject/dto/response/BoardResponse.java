@@ -1,5 +1,6 @@
 package com.example.altproject.dto.response;
 
+import com.example.altproject.chat.domain.ChatRoom;
 import com.example.altproject.domain.board.Board;
 import com.example.altproject.domain.hashtag.HashTag;
 import com.example.altproject.domain.image.Image;
@@ -24,6 +25,7 @@ public class BoardResponse {
     private int favoriteCount;
     private int viewCount;
     private int maxParticipants;
+    private Long chatRoomId;
     private Set<String> hashtags;
     private List<String> imageUrls;
 
@@ -67,6 +69,26 @@ public class BoardResponse {
                         .map(Image::getImage).
                         collect(Collectors.toList())
                 )
+                .build();
+    }
+
+    public static BoardResponse getResponseChat(Board board, ChatRoom chatRoom) {
+        return BoardResponse.builder()
+                .id(board.getId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .address(board.getAddress())
+                .maxParticipants(board.getMaxParticipants())
+                .totalPrice(board.getTotalPrice())
+                .favoriteCount(board.getFavoriteCount())
+                .viewCount(board.getViewCount())
+                .chatRoomId(chatRoom.getId())
+                .hashtags(board.getHashtags().stream()
+                        .map(HashTag::getHashtagName)
+                        .collect(Collectors.toSet()))
+                .imageUrls(board.getImages().stream()
+                        .map(Image::getImage)
+                        .collect(Collectors.toList()))
                 .build();
     }
 

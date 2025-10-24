@@ -18,6 +18,7 @@ public enum ErrorStatus {
     DUPLICATE_NICKNAME("DN", "Duplicate nickname", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_USER("NU", "This user does not exist", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_BOARD("NB", "This board does not exist", HttpStatus.BAD_REQUEST.value()),
+    NOT_EXISTED_CHATROOM("CR" ,"This chatRoom does not exist", HttpStatus.BAD_REQUEST.value()),
     UNSUPPORTED_OAUTH_PROVIDER("UP", "Unsupported OAuth2 Provider", HttpStatus.BAD_REQUEST.value()),
     EMPTY_FILE("FE", "File is empty", HttpStatus.BAD_REQUEST.value()),
     INVALID_FILE_NAME("FI", "Invalid file name", HttpStatus.BAD_REQUEST.value()),

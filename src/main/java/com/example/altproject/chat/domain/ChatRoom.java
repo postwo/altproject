@@ -2,10 +2,7 @@ package com.example.altproject.chat.domain;
 
 import com.example.altproject.common.auditing.AuditingFields;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString(exclude = {"chatParticipants", "chatMessages"}) // 무한 참조를 방지하기위해 두개는 제외
 public class ChatRoom extends AuditingFields {
 
     @Id

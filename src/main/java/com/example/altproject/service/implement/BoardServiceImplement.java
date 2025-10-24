@@ -1,5 +1,7 @@
 package com.example.altproject.service.implement;
 
+import com.example.altproject.chat.domain.ChatRoom;
+import com.example.altproject.chat.repository.ChatRoomRepository;
 import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
@@ -28,6 +30,7 @@ public class BoardServiceImplement implements BoardService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
     private final HashTagRepository hashTagRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final AuthUtil authUtil;
 
 
@@ -165,8 +168,10 @@ public class BoardServiceImplement implements BoardService {
         board.increaseViewCount();
         // save를 명시하지 않아도 @Transactional에 의해 변경 감지(Dirty Checking)가 작동하여 DB에 반영됩니다.
 
+        ChatRoom chatRoom = chatRoomRepository.findByName(board.getTitle()).orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM,"해당 제목에 채팅방이 없습니다"));
+
         // 3. 응답 DTO 반환 (게시글 엔티티를 DTO로 변환)
-        return BoardResponse.getResponse(board);
+        return BoardResponse.getResponseChat(board,chatRoom);
     }
 
 
