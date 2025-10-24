@@ -93,6 +93,7 @@ public class Board extends AuditingFields {
                 .totalPrice(request.getTotalPrice())
                 .content(request.getContent())
                 .writerEmail(author.getEmail())
+                .maxParticipants(request.getMaxParticipants())
                 .build();
     }
 

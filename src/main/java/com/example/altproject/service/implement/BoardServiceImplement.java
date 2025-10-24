@@ -40,6 +40,8 @@ public class BoardServiceImplement implements BoardService {
         Member author = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다. Email: " + email));
 
+        System.out.println("request parti" + request.getMaxParticipants());
+
         Board board = Board.create(request,author);
 
         if (request.getHashtags() != null && !request.getHashtags().isEmpty()) {

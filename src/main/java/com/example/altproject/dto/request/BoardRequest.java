@@ -28,7 +28,7 @@ public class BoardRequest {
 
     private int totalPrice;
 
-    private int maxParticipants;
+    private int maxParticipants; // 인원수
 
     @NotNull
     private List<String> boardImageList;

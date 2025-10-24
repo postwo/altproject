@@ -59,7 +59,6 @@ public class BoardController {
 
     @GetMapping("/detail/{boardId}")
     public ApiResponse<BoardResponse> BoardDetail(@PathVariable Long boardId){
-        System.out.println("요청왔어");
         BoardResponse response = boardService.boardDetail(boardId);
         return ApiResponse.Success(response);
     }
