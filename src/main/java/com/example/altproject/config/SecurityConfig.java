@@ -41,8 +41,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth-> auth
                         .requestMatchers("/api/member/**","/api/board/**"
                                 ,"/test/**","/oauth2/**","/file/**" ,"/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/private/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/private/**","/chat/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().denyAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
