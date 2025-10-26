@@ -17,5 +17,7 @@ public interface BoardService {
 
     List<BoardResponse> getUserBoardList(String email);
 
+    List<BoardResponse> getUserBoardParticipation(Object principal);
+
 }
 

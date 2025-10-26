@@ -20,4 +20,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     Optional<Board> findByIdWithDetails(@Param("boardId") Long boardId);
 
     List<Board> findByWriterEmailOrderByCreatedAtDesc(String email);
+
+    List<Board> findByTitleIn(List<String> titles);
 }

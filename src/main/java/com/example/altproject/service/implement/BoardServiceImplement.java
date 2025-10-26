@@ -1,6 +1,8 @@
 package com.example.altproject.service.implement;
 
+import com.example.altproject.chat.domain.ChatParticipant;
 import com.example.altproject.chat.domain.ChatRoom;
+import com.example.altproject.chat.repository.ChatParticipantRepository;
 import com.example.altproject.chat.repository.ChatRoomRepository;
 import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.ErrorStatus;
@@ -31,6 +33,7 @@ public class BoardServiceImplement implements BoardService {
     private final BoardRepository boardRepository;
     private final HashTagRepository hashTagRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
     private final AuthUtil authUtil;
 
 
@@ -183,7 +186,7 @@ public class BoardServiceImplement implements BoardService {
         List<Board> boards = boardRepository.findByWriterEmailOrderByCreatedAtDesc(member.getEmail());
 
         if (boards.isEmpty()) {
-            throw new IllegalStateException("작성한 게시글이 없습니다.");
+            throw new ApiException(ErrorStatus.NOT_EXISTED_BOARD,"작성한 게시글이 없습니다.");
         }
 
         return boards.stream()
@@ -191,7 +194,35 @@ public class BoardServiceImplement implements BoardService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getUserBoardParticipation(Object principal) {
+        // 1. principal 객체로부터 현재 로그인한 사용자의 이메일을 가져옵니다.
+        String email = authUtil.getEmail(principal);
 
+        // 2. 이메일을 통해 'Member' 엔티티를 먼저 조회합니다.
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER, "해당 사용자를 찾을 수 없습니다."));
 
+        // 3. 사용자가 참여한 채팅방 목록 조회 (ChatParticipant를 통해)
+        List<ChatParticipant> participants = chatParticipantRepository.findByMember(member);
+        
+        if (participants.isEmpty()) {
+            throw new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM, "참여한 채팅방이 없습니다");
+        }
+
+        // 4. 채팅방 이름 리스트 추출
+        List<String> roomNames = participants.stream()
+                .map(participant -> participant.getChatRoom().getName())
+                .collect(Collectors.toList());
+
+        // 5. 채팅방 이름과 일치하는 제목의 게시글 조회
+        List<Board> boards = boardRepository.findByTitleIn(roomNames);
+
+        // 6. Board 엔티티를 BoardResponse DTO로 변환하여 반환
+        return boards.stream()
+                .map(BoardResponse::userBoardList)
+                .collect(Collectors.toList());
+    }
 
 }

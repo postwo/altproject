@@ -67,9 +67,17 @@ public class BoardController {
     @GetMapping("/user-board-list/{email}")
     public ApiResponse<List<BoardResponse>>  getMyBoardList(@PathVariable("email") String email) {
         List<BoardResponse> response = boardService.getUserBoardList(email);
+        System.out.println("response= "+response);
         return ApiResponse.Success(response);
     }
 
+
+    // 내가 참여한 게시물 리스트
+    @GetMapping("/participated-boards")
+    public ApiResponse<List<BoardResponse>> getMychatBoard(@AuthenticationPrincipal Object principal){
+        List<BoardResponse> response = boardService.getUserBoardParticipation(principal);
+        return ApiResponse.Success(response);
+    }
 
 
 
