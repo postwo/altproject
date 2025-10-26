@@ -153,9 +153,6 @@ public class BoardServiceImplement implements BoardService {
     @Override
     @Transactional // 조회수 증가(쓰기 작업)가 필요하므로 @Transactional을 유지합니다.
     public BoardResponse boardDetail(Long boardId) {
-
-        System.out.println("나까지 왔어");
-
         // 1. 게시글 조회
         // Lazy Loading으로 인한 N+1 문제를 방지하기 위해 Fetch Join을 사용하는 BoardRepository 메서드를 사용하는 것이 일반적입니다.
         // 현재 BoardRepository에 @EntityGraph가 정의된 findAllWithDetails()만 있으므로,
@@ -174,6 +171,25 @@ public class BoardServiceImplement implements BoardService {
         return BoardResponse.getResponseChat(board,chatRoom);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getUserBoardList(String email) {
+
+        // 1. 이메일로 사용자를 조회합니다. 없으면 예외를 발생시킵니다.
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"해당 사용자를 찾을 수 없습니다. email=" + email));
+
+        // 2. 해당 사용자가 작성한 모든 게시글을 최신순으로 조회합니다.
+        List<Board> boards = boardRepository.findByWriterEmailOrderByCreatedAtDesc(member.getEmail());
+
+        if (boards.isEmpty()) {
+            throw new IllegalStateException("작성한 게시글이 없습니다.");
+        }
+
+        return boards.stream()
+                .map(BoardResponse::userBoardList)
+                .collect(Collectors.toList());
+    }
 
 
 

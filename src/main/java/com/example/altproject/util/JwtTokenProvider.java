@@ -23,12 +23,13 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    public String generateAccessToken (String email, List<String> roles){
+    public String generateAccessToken (String email, List<String> roles,String nickname){
         long expiration_30m = 1000L * 60 * 60;
 
         return Jwts.builder()
                 .setSubject(email)
                 .claim("roles",roles)
+                .claim("nickname", nickname)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration_30m))
                 .signWith(key)

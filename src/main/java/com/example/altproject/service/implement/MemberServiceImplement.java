@@ -1,15 +1,18 @@
 package com.example.altproject.service.implement;
 
+import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.member.Member;
 import com.example.altproject.dto.request.SignInRequest;
 import com.example.altproject.dto.request.SignUpRequest;
+import com.example.altproject.dto.response.MemberResponse;
 import com.example.altproject.dto.response.SignInResponse;
 import com.example.altproject.dto.response.SignUpResponse;
 import com.example.altproject.repository.MemberRepository;
 import com.example.altproject.service.MemberService;
 import com.example.altproject.util.JwtTokenProvider;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class MemberServiceImplement implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final StringRedisTemplate redisTemplate;
+    private final AuthUtil authUtil;
 
 
     @Override
@@ -79,7 +83,7 @@ public class MemberServiceImplement implements MemberService {
                 .map(Enum::name)
                 .toList();
 
-        return jwtTokenProvider.generateAccessToken(member.getEmail(), roles);
+        return jwtTokenProvider.generateAccessToken(member.getEmail(), roles,member.getNickname());
     }
 
     @Override
@@ -125,6 +129,15 @@ public class MemberServiceImplement implements MemberService {
 
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public MemberResponse getMemberInfo(Object principal) {
+        String email = authUtil.getEmail(principal);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"사용자를 찾을 수 없습니다."));
+
+        return  MemberResponse.from(member);
+    }
 
 
 }

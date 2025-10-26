@@ -111,4 +111,24 @@ public class BoardResponse {
                 .build();
     }
 
+    public static BoardResponse userBoardList(Board board) {
+        return BoardResponse.builder()
+                .id(board.getId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .address(board.getAddress())
+                .maxParticipants(board.getMaxParticipants())
+                .totalPrice(board.getTotalPrice())
+                .favoriteCount(board.getFavoriteCount())
+                .viewCount(board.getViewCount())
+                .hashtags(board.getHashtags().stream()
+                        .map(HashTag::getHashtagName)
+                        .collect(Collectors.toSet()))
+                .imageUrls(board.getImages().stream()
+                        .map(Image::getImage)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+
 }

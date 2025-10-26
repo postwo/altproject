@@ -18,4 +18,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     // 상세 조회 시 N+1 문제를 방지하기 위한 Fetch Join 쿼리 추가
     @Query("SELECT b FROM Board b LEFT JOIN FETCH b.images LEFT JOIN FETCH b.hashtags WHERE b.id = :boardId")
     Optional<Board> findByIdWithDetails(@Param("boardId") Long boardId);
+
+    List<Board> findByWriterEmailOrderByCreatedAtDesc(String email);
 }

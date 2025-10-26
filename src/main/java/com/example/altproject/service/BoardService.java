@@ -14,5 +14,8 @@ public interface BoardService {
 
     List<BoardResponse> getLatestBoardList();
     BoardResponse boardDetail(Long boardId);
+
+    List<BoardResponse> getUserBoardList(String email);
+
 }
 

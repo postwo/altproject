@@ -1,6 +1,5 @@
 package com.example.altproject.controller;
 
-import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.api.ApiResponse;
 import com.example.altproject.dto.request.BoardRequest;
 import com.example.altproject.dto.response.BoardResponse;
@@ -19,7 +18,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
-    private final AuthUtil authUtil;
+
 
     // 게시글 작성
     @PostMapping("/create")
@@ -64,20 +63,21 @@ public class BoardController {
         return ApiResponse.Success(response);
     }
 
-
-
-
     //자신이 작성한 게시물 리스트
-//    @GetMapping("/user-board-list/{email}")
-//    public ApiResponse<BoardResponse>  getMyBoardList(@PathVariable("email") String email) {
-//        BoardResponse response = boardService.getUserBoardList(email);
-//        return ApiResponse.Success(response);
-//    }
+    @GetMapping("/user-board-list/{email}")
+    public ApiResponse<List<BoardResponse>>  getMyBoardList(@PathVariable("email") String email) {
+        List<BoardResponse> response = boardService.getUserBoardList(email);
+        return ApiResponse.Success(response);
+    }
+
+
+
+
 
 
 //    //좋아요
 //    @PutMapping("/{boardNumber}/favorite")
-//    public ResponseEntity<? super PutFavoriteResponseDto> putFavorite(
+//    public ApiResponse<? super PutFavoriteResponseDto> putFavorite(
 //            @PathVariable("boardNumber") Integer boardNumber,
 //            @AuthenticationPrincipal String email
 //    ){

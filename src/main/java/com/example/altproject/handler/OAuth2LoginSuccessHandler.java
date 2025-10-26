@@ -62,7 +62,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         List<String> roles = member.getMemberRoleList().stream()
                 .map(Enum::name)
                 .toList();
-        String accessToken = jwtTokenProvider.generateAccessToken(email, roles);
+        String accessToken = jwtTokenProvider.generateAccessToken(email, roles,member.getNickname());
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
 
         redisTemplate.opsForValue().set(email, refreshToken, Duration.ofDays(7));

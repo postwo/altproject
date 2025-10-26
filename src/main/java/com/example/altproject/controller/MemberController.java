@@ -3,6 +3,7 @@ package com.example.altproject.controller;
 import com.example.altproject.common.api.ApiResponse;
 import com.example.altproject.dto.request.SignInRequest;
 import com.example.altproject.dto.request.SignUpRequest;
+import com.example.altproject.dto.response.MemberResponse;
 import com.example.altproject.dto.response.SignInResponse;
 import com.example.altproject.dto.response.SignUpResponse;
 import com.example.altproject.repository.MemberRepository;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -63,4 +65,10 @@ public class MemberController {
         response.addCookie(refreshCookie);
     }
 
+    @GetMapping("/me")
+    public ApiResponse<MemberResponse> meUser(@AuthenticationPrincipal Object principal){
+        MemberResponse response = memberService.getMemberInfo(principal);
+
+        return ApiResponse.Success(response);
+    }
 }
