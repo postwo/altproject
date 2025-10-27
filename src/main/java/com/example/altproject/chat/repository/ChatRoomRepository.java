@@ -12,4 +12,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findByIsGroupChat(String isGroupChat);
 
     Optional<ChatRoom> findByName(String title);
+
+    void deleteByName(String name);
 }

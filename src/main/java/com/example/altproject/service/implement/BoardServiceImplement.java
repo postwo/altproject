@@ -132,6 +132,8 @@ public class BoardServiceImplement implements BoardService {
         validateWriter(board, email);
 
         boardRepository.delete(board);
+
+        chatRoomRepository.deleteByName(board.getTitle());
     }
 
 

@@ -26,4 +26,3 @@ public class ChatParticipant extends AuditingFields {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 }
-
