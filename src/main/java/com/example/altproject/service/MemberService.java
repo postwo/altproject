@@ -17,4 +17,6 @@ public interface MemberService {
     void logout(String token);
 
     MemberResponse getMemberInfo(Object principal);
+
+    MemberResponse updateNickname(Object principal,String nickname);
 }

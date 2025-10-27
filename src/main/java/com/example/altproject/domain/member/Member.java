@@ -35,6 +35,7 @@ public class Member {
     private String password;
 
     @Column(length = 50 ,nullable = false)
+    @Setter
     private String nickname;
 
     @Builder.Default
@@ -106,4 +107,6 @@ public class Member {
                 .social(true)
                 .build();
     }
+
+
 }

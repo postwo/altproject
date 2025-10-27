@@ -12,7 +12,6 @@ import com.example.altproject.dto.response.SignUpResponse;
 import com.example.altproject.repository.MemberRepository;
 import com.example.altproject.service.MemberService;
 import com.example.altproject.util.JwtTokenProvider;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -137,6 +136,17 @@ public class MemberServiceImplement implements MemberService {
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"사용자를 찾을 수 없습니다."));
 
         return  MemberResponse.from(member);
+    }
+
+    @Override
+    @Transactional
+    public MemberResponse updateNickname(Object principal, String nickname) {
+        String email = authUtil.getEmail(principal);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"사용자를 찾을 수 없습니다."));
+
+        member.setNickname(nickname);
+        return MemberResponse.from(member);
     }
 
 

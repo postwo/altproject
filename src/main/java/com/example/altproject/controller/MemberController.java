@@ -71,4 +71,10 @@ public class MemberController {
 
         return ApiResponse.Success(response);
     }
+
+    @PatchMapping("/update")
+    public ApiResponse<MemberResponse> updateMember(@AuthenticationPrincipal Object principal,@RequestParam String nickname){
+        MemberResponse response = memberService.updateNickname(principal,nickname);
+        return ApiResponse.Success(response);
+    }
 }
