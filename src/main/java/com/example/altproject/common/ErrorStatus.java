@@ -23,7 +23,7 @@ public enum ErrorStatus {
     EMPTY_FILE("FE", "File is empty", HttpStatus.BAD_REQUEST.value()),
     INVALID_FILE_NAME("FI", "Invalid file name", HttpStatus.BAD_REQUEST.value()),
     NOT_EXISTED_FILE("FN", "File does not exist or is not readable", HttpStatus.BAD_REQUEST.value()),
-
+    ALREADY_REPORTED_BOARD("AR", "ALREADY_REPORTED_BOARD", HttpStatus.BAD_REQUEST.value()),
 
     // HTTP STATUS 401
     SIGN_IN_FAIL("SF", "Login information mismatch", HttpStatus.UNAUTHORIZED.value()),

@@ -8,11 +8,14 @@ import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.board.Board;
+import com.example.altproject.domain.board.BoardReport;
 import com.example.altproject.domain.hashtag.HashTag;
 import com.example.altproject.domain.image.Image;
 import com.example.altproject.domain.member.Member;
+import com.example.altproject.dto.request.BoardReportRequest;
 import com.example.altproject.dto.request.BoardRequest;
 import com.example.altproject.dto.response.BoardResponse;
+import com.example.altproject.repository.BoardReportRepository;
 import com.example.altproject.repository.BoardRepository;
 import com.example.altproject.repository.HashTagRepository;
 import com.example.altproject.repository.MemberRepository;
@@ -34,6 +37,7 @@ public class BoardServiceImplement implements BoardService {
     private final HashTagRepository hashTagRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final BoardReportRepository boardReportRepository;
     private final AuthUtil authUtil;
 
 
@@ -225,6 +229,35 @@ public class BoardServiceImplement implements BoardService {
         return boards.stream()
                 .map(BoardResponse::userBoardList)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void reportBoard(Long boardId, Object principal, BoardReportRequest request) {
+
+        String email = authUtil.getEmail(principal);
+        // 1. 신고자(Member)와 신고된 게시글(Board)을 조회합니다.
+        Member reporter = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER));
+
+        Board reportedBoard = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD));
+
+        // 2. [핵심] 사용자가 동일한 게시글을 이미 신고했는지 확인합니다.
+        if (boardReportRepository.existsByReporterAndReportedBoard(reporter, reportedBoard)) {
+            throw new ApiException(ErrorStatus.ALREADY_REPORTED_BOARD);
+        }
+
+        // 3. 신고 내역(BoardReport) 엔티티를 생성합니다.
+        BoardReport report = BoardReport.builder()
+                .reporter(reporter)
+                .reportedBoard(reportedBoard)
+                .reason(request.getReason())
+                .details(request.getDetails())
+                .build();
+
+        // 4. 생성된 신고 내역을 데이터베이스에 저장합니다.
+        boardReportRepository.save(report);
     }
 
 }

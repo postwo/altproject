@@ -1,11 +1,13 @@
 package com.example.altproject.controller;
 
 import com.example.altproject.common.api.ApiResponse;
+import com.example.altproject.dto.request.BoardReportRequest;
 import com.example.altproject.dto.request.BoardRequest;
 import com.example.altproject.dto.response.BoardResponse;
 import com.example.altproject.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,6 +82,15 @@ public class BoardController {
     }
 
 
+    // 신고
+    @PostMapping("/{boardId}/report")
+    public ResponseEntity<String> reportBoard(
+            @PathVariable Long boardId,
+            @RequestBody BoardReportRequest request,
+            @AuthenticationPrincipal Object principal) {
+        boardService.reportBoard(boardId, principal, request);
+        return ResponseEntity.ok("게시글이 정상적으로 신고되었습니다.");
+    }
 
 
 
