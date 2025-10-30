@@ -18,6 +18,7 @@ public class ChatRoom extends AuditingFields {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Setter
     @Column(nullable = false)
     private String name;
     @Builder.Default

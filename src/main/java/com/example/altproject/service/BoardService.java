@@ -21,5 +21,7 @@ public interface BoardService {
     List<BoardResponse> getUserBoardParticipation(Object principal);
 
     void reportBoard(Long boardId,Object principal, BoardReportRequest request);
+
+    void increaseViewCount(Long boardId);
 }
 

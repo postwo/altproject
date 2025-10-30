@@ -100,5 +100,8 @@ public class Board extends AuditingFields {
     public void update(BoardRequest request) {
         this.title = request.getTitle();
         this.content = request.getContent();
+        this.address = request.getAddress();
+        this.totalPrice = request.getTotalPrice();
+        this.maxParticipants = request.getMaxParticipants();
     }
 }

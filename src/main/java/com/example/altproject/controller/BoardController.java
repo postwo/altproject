@@ -33,6 +33,7 @@ public class BoardController {
     // 게시글 수정
     @PatchMapping("/update/{boardId}")
     public ApiResponse<BoardResponse> updateBoard(@PathVariable Long boardId, @RequestBody BoardRequest dto, @AuthenticationPrincipal Object principal) {
+        System.out.println("request = "+ dto);
         BoardResponse response = boardService.patchBoard(boardId, dto,principal);
         return ApiResponse.Success(response);
     }
@@ -92,6 +93,12 @@ public class BoardController {
         return ResponseEntity.ok("게시글이 정상적으로 신고되었습니다.");
     }
 
+    // view count
+    @PatchMapping("/{boardId}/view")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long boardId) {
+        boardService.increaseViewCount(boardId);
+        return ResponseEntity.ok().build();
+    }
 
 
 //    //좋아요

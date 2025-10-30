@@ -84,12 +84,26 @@ public class BoardServiceImplement implements BoardService {
         String email = authUtil.getEmail(principal);
 
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD,"해당 게시글이 존재하지 않습니다. "));
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다. "));
 
         validateWriter(board, email);
 
+        // ✨ 1. [핵심] 게시글 제목을 바꾸기 전에, "이전 제목"을 변수에 저장해 둡니다.
+        String oldTitle = board.getTitle();
+
+        // ✨ 2. "이전 제목"으로 채팅방을 미리 찾아놓습니다.
+        //    만약 여기서 채팅방을 못 찾으면, 데이터에 문제가 있는 것이므로 예외를 발생시키는 것이 맞습니다.
+        ChatRoom chatRoom = chatRoomRepository.findByName(oldTitle)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM, "게시글과 연결된 채팅방을 찾을 수 없습니다."));
+
+        // 3. 이제 안심하고 게시글 정보를 업데이트합니다. (이때 board.title이 새로운 제목으로 변경됩니다)
         board.update(request);
 
+        // 4. 미리 찾아두었던 chatRoom 객체의 이름을 "새로운 제목"으로 변경합니다.
+        //    board.getTitle()은 이제 새로운 제목을 반환합니다.
+        chatRoom.setName(board.getTitle());
+
+        // --- 이하 해시태그, 이미지 업데이트 로직은 동일 ---
         if (request.getHashtags() != null) {
             Set<HashTag> newHashtags = request.getHashtags().stream()
                     .map(name -> hashTagRepository.findByHashtagName(name)
@@ -111,7 +125,10 @@ public class BoardServiceImplement implements BoardService {
             board.getImages().addAll(imageEntities);
         }
 
-        boardRepository.save(board);
+        // @Transactional에 의해 board와 chatRoom의 변경사항이 모두 자동으로 DB에 반영됩니다.
+        // 따라서 save를 명시적으로 호출하지 않아도 괜찮습니다. (JPA의 Dirty Checking)
+        // boardRepository.save(board);
+        // chatRoomRepository.save(chatRoom);
 
         return BoardResponse.updateResponse(board);
     }
@@ -170,14 +187,16 @@ public class BoardServiceImplement implements BoardService {
         Board board = boardRepository.findByIdWithDetails(boardId)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다. Board ID: " + boardId));
 
-        // 2. 조회수 증가
-        board.increaseViewCount();
-        // save를 명시하지 않아도 @Transactional에 의해 변경 감지(Dirty Checking)가 작동하여 DB에 반영됩니다.
-
         ChatRoom chatRoom = chatRoomRepository.findByName(board.getTitle()).orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM,"해당 제목에 채팅방이 없습니다"));
 
-        // 3. 응답 DTO 반환 (게시글 엔티티를 DTO로 변환)
         return BoardResponse.getResponseChat(board,chatRoom);
+    }
+
+    @Transactional
+    public void increaseViewCount(Long boardId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD));
+        board.increaseViewCount();
     }
 
     @Override
