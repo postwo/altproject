@@ -43,6 +43,10 @@ public class Board extends AuditingFields {
 
     private String writerEmail;
 
+    @Setter
+//    @Transient  // DB에 매핑되지 않는 필드
+    private boolean isLiked;
+
     @Builder.Default
     @ToString.Exclude
     @JoinTable(

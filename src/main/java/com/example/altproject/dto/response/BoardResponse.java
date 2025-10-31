@@ -26,6 +26,7 @@ public class BoardResponse {
     private int viewCount;
     private int maxParticipants;
     private Long chatRoomId;
+    private boolean isLiked;
     private Set<String> hashtags;
     private List<String> imageUrls;
 
@@ -82,6 +83,7 @@ public class BoardResponse {
                 .totalPrice(board.getTotalPrice())
                 .favoriteCount(board.getFavoriteCount())
                 .viewCount(board.getViewCount())
+                .isLiked(board.isLiked())
                 .chatRoomId(chatRoom.getId())
                 .hashtags(board.getHashtags().stream()
                         .map(HashTag::getHashtagName)

@@ -14,7 +14,7 @@ public interface BoardService {
     void deleteBoard(Long boardId, Object principal);
 
     List<BoardResponse> getLatestBoardList();
-    BoardResponse boardDetail(Long boardId);
+    BoardResponse boardDetail(Long boardId,Object principal);
 
     List<BoardResponse> getUserBoardList(String email);
 

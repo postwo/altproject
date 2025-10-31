@@ -61,8 +61,9 @@ public class BoardController {
 
     // 게시물 상세보기
     @GetMapping("/detail/{boardId}")
-    public ApiResponse<BoardResponse> BoardDetail(@PathVariable Long boardId){
-        BoardResponse response = boardService.boardDetail(boardId);
+    public ApiResponse<BoardResponse> BoardDetail(@PathVariable Long boardId,@AuthenticationPrincipal Object principal){
+        BoardResponse response = boardService.boardDetail(boardId,principal);
+        log.info("response  = "+response.isLiked());
         return ApiResponse.Success(response);
     }
 
@@ -70,7 +71,6 @@ public class BoardController {
     @GetMapping("/user-board-list/{email}")
     public ApiResponse<List<BoardResponse>>  getMyBoardList(@PathVariable("email") String email) {
         List<BoardResponse> response = boardService.getUserBoardList(email);
-        System.out.println("response= "+response);
         return ApiResponse.Success(response);
     }
 

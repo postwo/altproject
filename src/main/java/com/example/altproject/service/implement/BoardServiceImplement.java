@@ -191,14 +191,18 @@ public class BoardServiceImplement implements BoardService {
     // 게시글 상세보기
     @Override
     @Transactional // 조회수 증가(쓰기 작업)가 필요하므로 @Transactional을 유지합니다.
-    public BoardResponse boardDetail(Long boardId) {
+    public BoardResponse boardDetail(Long boardId,Object principal) {
         // 1. 게시글 조회
         // Lazy Loading으로 인한 N+1 문제를 방지하기 위해 Fetch Join을 사용하는 BoardRepository 메서드를 사용하는 것이 일반적입니다.
         // 현재 BoardRepository에 @EntityGraph가 정의된 findAllWithDetails()만 있으므로,
         // findById()를 사용하되 N+1 문제를 감안하거나 (임시 방편), 상세 조회용 Fetch Join 쿼리를 추가해야 합니다.
-
+        String email = authUtil.getEmail(principal);
         Board board = boardRepository.findByIdWithDetails(boardId)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다. Board ID: " + boardId));
+
+        // 현재 사용자의 좋아요 여부 확인
+        boolean isLiked = favoriteRepository.existsByBoardIdAndMemberEmail(boardId, email);
+        board.setLiked(isLiked);
 
         ChatRoom chatRoom = chatRoomRepository.findByName(board.getTitle()).orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM,"해당 제목에 채팅방이 없습니다"));
 
