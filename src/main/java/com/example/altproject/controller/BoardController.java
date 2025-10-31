@@ -101,15 +101,15 @@ public class BoardController {
     }
 
 
-//    //좋아요
-//    @PutMapping("/{boardNumber}/favorite")
-//    public ApiResponse<? super PutFavoriteResponseDto> putFavorite(
-//            @PathVariable("boardNumber") Integer boardNumber,
-//            @AuthenticationPrincipal String email
-//    ){
-//        ResponseEntity<? super PutFavoriteResponseDto> response = boardService.putFavorite(boardNumber, email);
-//        return response;
-//    }
+    //좋아요
+    @PutMapping("/{boardId}/favorite")
+    public ResponseEntity<Void> putFavorite(
+            @PathVariable("boardId") Long boardId ,
+            @AuthenticationPrincipal Object principal
+    ){
+        boardService.putFavorite(boardId,principal);
+        return ResponseEntity.ok().build();
+    }
 //
 //    //좋아요 게시물
 //    @GetMapping("/{boardNumber}/favorite-list")

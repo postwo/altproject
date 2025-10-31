@@ -23,5 +23,7 @@ public interface BoardService {
     void reportBoard(Long boardId,Object principal, BoardReportRequest request);
 
     void increaseViewCount(Long boardId);
+
+    void putFavorite(Long boardId, Object principal);
 }
 

@@ -9,16 +9,14 @@ import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.board.Board;
 import com.example.altproject.domain.board.BoardReport;
+import com.example.altproject.domain.favorite.Favorite;
 import com.example.altproject.domain.hashtag.HashTag;
 import com.example.altproject.domain.image.Image;
 import com.example.altproject.domain.member.Member;
 import com.example.altproject.dto.request.BoardReportRequest;
 import com.example.altproject.dto.request.BoardRequest;
 import com.example.altproject.dto.response.BoardResponse;
-import com.example.altproject.repository.BoardReportRepository;
-import com.example.altproject.repository.BoardRepository;
-import com.example.altproject.repository.HashTagRepository;
-import com.example.altproject.repository.MemberRepository;
+import com.example.altproject.repository.*;
 import com.example.altproject.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +36,7 @@ public class BoardServiceImplement implements BoardService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final BoardReportRepository boardReportRepository;
+    private final FavoriteRepository favoriteRepository;
     private final AuthUtil authUtil;
 
 
@@ -86,21 +85,40 @@ public class BoardServiceImplement implements BoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD, "해당 게시글이 존재하지 않습니다. "));
 
+        // 이 검증을 통과하면 'email' 변수는 게시글 작성자의 이메일임이 보장됩니다.
         validateWriter(board, email);
 
-        // ✨ 1. [핵심] 게시글 제목을 바꾸기 전에, "이전 제목"을 변수에 저장해 둡니다.
         String oldTitle = board.getTitle();
 
-        // ✨ 2. "이전 제목"으로 채팅방을 미리 찾아놓습니다.
-        //    만약 여기서 채팅방을 못 찾으면, 데이터에 문제가 있는 것이므로 예외를 발생시키는 것이 맞습니다.
+        // 채팅방을 이름으로 찾되, 만약 존재하지 않으면 새로 생성하여 대처합니다.
         ChatRoom chatRoom = chatRoomRepository.findByName(oldTitle)
-                .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_CHATROOM, "게시글과 연결된 채팅방을 찾을 수 없습니다."));
+                .orElseGet(() -> {
+                    System.out.println("기존 채팅방이 없어 새로 생성합니다. Title: " + oldTitle);
 
-        // 3. 이제 안심하고 게시글 정보를 업데이트합니다. (이때 board.title이 새로운 제목으로 변경됩니다)
+                    // 1. 이 게시글을 위한 새로운 채팅방을 생성합니다.
+                    ChatRoom newChatRoom = ChatRoom.builder()
+                            .name(oldTitle)
+                            .build();
+
+                    // ✨ 해결: 'email' 변수를 사용해 DB에서 Member 객체를 직접 조회합니다.
+                    Member author = memberRepository.findByEmail(email)
+                            .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER, "작성자 정보를 찾을 수 없습니다."));
+
+                    // 2. 조회한 작성자(author) 객체로 참여자를 생성합니다.
+                    ChatParticipant participant = ChatParticipant.builder()
+                            .member(author)
+                            .chatRoom(newChatRoom)
+                            .build();
+                    chatParticipantRepository.save(participant);
+
+                    // 3. 완성된 새 채팅방을 DB에 저장하고 반환합니다.
+                    return chatRoomRepository.save(newChatRoom);
+                });
+
+        // 이제 안심하고 게시글 정보를 업데이트합니다.
         board.update(request);
 
-        // 4. 미리 찾아두었던 chatRoom 객체의 이름을 "새로운 제목"으로 변경합니다.
-        //    board.getTitle()은 이제 새로운 제목을 반환합니다.
+        // 위 로직을 통해 '찾아오거나' 또는 '새로 생성한' chatRoom 객체의 이름을 "새로운 제목"으로 변경합니다.
         chatRoom.setName(board.getTitle());
 
         // --- 이하 해시태그, 이미지 업데이트 로직은 동일 ---
@@ -124,11 +142,6 @@ public class BoardServiceImplement implements BoardService {
             board.getImages().clear();
             board.getImages().addAll(imageEntities);
         }
-
-        // @Transactional에 의해 board와 chatRoom의 변경사항이 모두 자동으로 DB에 반영됩니다.
-        // 따라서 save를 명시적으로 호출하지 않아도 괜찮습니다. (JPA의 Dirty Checking)
-        // boardRepository.save(board);
-        // chatRoomRepository.save(chatRoom);
 
         return BoardResponse.updateResponse(board);
     }
@@ -197,6 +210,29 @@ public class BoardServiceImplement implements BoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_BOARD));
         board.increaseViewCount();
+    }
+
+    @Override
+    @Transactional
+    public void putFavorite(Long boardId, Object principal) {
+        String email = authUtil.getEmail(principal);
+        Member member = memberRepository.findByEmail(email).orElseThrow(()->new ApiException(ErrorStatus.NOT_EXISTED_USER,"해당 사용자가 존재하지 않습니다."));
+
+        Board board = boardRepository.findById(boardId).orElseThrow(()->new ApiException(ErrorStatus.NOT_EXISTED_BOARD,"해당 게시글이 존재하지 않습니다."));
+
+        Favorite favorite = favoriteRepository.findByBoardIdAndMemberEmail(boardId,email);
+
+        if (favorite == null) {
+            favorite = new Favorite(member,board);
+            favoriteRepository.save(favorite);
+            board.increaseFavoriteCount();
+        }
+        else {
+            favoriteRepository.delete(favorite);
+            board.decreaseFavoriteCount();
+        }
+
+        boardRepository.save(board);
     }
 
     @Override
