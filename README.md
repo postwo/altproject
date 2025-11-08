@@ -1,3 +1,85 @@
+# 채팅 시퀀스 회로
+https://mermaid.live 여기 들어가서 확인가능
+
+sequenceDiagram
+participant Client
+participant StompBroker
+participant StompController
+participant ChatService
+participant RedisPubSubService
+participant Redis
+participant RedisSubscriber
+participant SimpMessageSendingOperations
+
+    Client->>+StompBroker: 1. CONNECT
+    StompBroker-->>-Client: 2. CONNECTED
+
+    Client->>+StompBroker: 3. SUBSCRIBE /topic/{roomId}
+    StompBroker-->>-Client: 4. SUBSCRIBED
+
+    Client->>+StompBroker: 5. SEND /app/{roomId} (ChatMessageDto)
+    StompBroker->>+StompController: 6. sendMessage(roomId, chatMessageDto)
+    StompController->>+ChatService: 7. saveMessage(roomId, chatMessageDto)
+    ChatService-->>-StompController: 8. 메시지 저장 완료
+    StompController->>+RedisPubSubService: 9. publish("chat", message)
+    RedisPubSubService->>+Redis: 10. PUBLISH chat "message"
+    Redis-->>-RedisPubSubService: 11. 발행 완료
+    RedisPubSubService-->>-StompController: 12. 발행 완료
+    StompController-->>-StompBroker: 13. 처리 완료
+
+    Redis->>+RedisSubscriber: 14. onMessage("chat", "message")
+    RedisSubscriber->>+SimpMessageSendingOperations: 15. convertAndSend("/topic/"+roomId, chatMessageDto)
+    SimpMessageSendingOperations->>+StompBroker: 16. MESSAGE /topic/{roomId}
+    StompBroker-->>-RedisSubscriber: 17. 전송 완료
+    RedisSubscriber-->>-Redis: 18. 처리 완료
+
+    StompBroker->>Client: 19. MESSAGE /topic/{roomId} (ChatMessageDto)
+
+# 채팅 설명
+1. 연결 및 구독 단계
+   •
+   Client → StompBroker: 사용자가 채팅방에 들어가면, 먼저 서버의 StompBroker와 웹소켓(WebSocket) 연결을 맺습니다.
+   •
+   Client → StompBroker: 연결이 성공하면, Client는 특정 채팅방(roomId)에 오는 메시지를 받기 위해 /topic/{roomId}라는 주소를 **구독(Subscribe)**합니다. 이제 이 주소로 오는 모든 메시지를 수신할 준비가 된 상태입니다.
+2. 메시지 전송 및 저장 단계
+   •
+   Client → StompBroker: 사용자가 메시지를 입력하고 전송하면, 이 메시지(ChatMessageDto)는 /app/{roomId}라는 주소로 보내집니다.
+   •
+   StompBroker → StompController: StompBroker는 /app/{roomId}로 들어온 메시지를 보고, 이를 처리할 StompController의 sendMessage 메소드를 호출합니다.
+   •
+   StompController → ChatService: StompController는 ChatService를 호출하여, 받은 메시지를 데이터베이스에 저장합니다. 이는 대화 기록을 남기기 위함입니다.
+3. 메시지 발행(Publish) 단계
+   •
+   StompController → RedisPubSubService: 메시지 저장이 끝나면, StompController는 RedisPubSubService를 통해 메시지를 Redis의 "chat" 채널로 **발행(Publish)**합니다.
+   •
+   RedisPubSubService → Redis: 서비스는 받은 메시지를 Redis 서버로 전달하여 "chat" 채널에 등록된 모든 구독자에게 알릴 준비를 합니다.
+   (핵심 이유: 만약 서버가 여러 대(Scale-out)라면, A 서버에 접속한 사용자의 메시지를 B 서버에 접속한 사용자에게 전달해야 합니다. Redis가 이 중간 다리 역할을 합니다.)
+4. 메시지 구독 및 재전송 단계
+   •
+   Redis → RedisSubscriber: Redis는 "chat" 채널로 메시지가 들어왔음을 모든 구독자(RedisSubscriber)에게 알립니다.
+   •
+   RedisSubscriber → SimpMessageSendingOperations: 메시지를 받은 RedisSubscriber는 SimpMessageSendingOperations라는 메시지 전송 도구를 사용하여, 이 메시지를 다시 웹소켓 브로커에게 보낼 준비를 합니다. 보낼 주소는 맨 처음 사용자가 구독했던 /topic/{roomId} 입니다.
+   •
+   SimpMessageSendingOperations → StompBroker: 메시지 전송 도구는 StompBroker에게 "이 메시지를 /topic/{roomId} 주소로 보내줘" 라고 요청합니다.
+5. 최종 메시지 수신 단계
+   •
+   StompBroker → Client: StompBroker는 /topic/{roomId} 주소를 구독하고 있던 모든 Client에게 최종적으로 메시지를 전달합니다.
+   •
+   결과: 채팅방에 참여한 모든 사용자의 화면에 새로운 메시지가 표시됩니다.
+
+
+# @RequestParam (쿼리 파라미터)
+예시 1: 특정 게시글 조회게시글 번호($\text{id}$)를 이용해 특정 게시글을 조회할 때
+게시글 번호($\text{id}$)를 이용해 특정 게시글을 조회할 때URL: /api/posts/105용도: 여기서 $\text{105}$는 105번 게시글이라는 특정 리소스를 식별하는 값입니다.
+
+예시 2: 특정 사용자 프로필 조회
+사용자의 아이디나 이메일($\text{email}$)을 경로로 받아 해당 사용자 정보를 조회할 때URL: /api/users/user@example.com
+
+# @PathVariable
+예시 1: 게시글 목록 검색 및 페이징
+게시글 목록을 조회할 때 **검색어($\text{keyword}$)**와 **페이지 번호($\text{page}$)**를 전달할 때URL: /api/posts?keyword=자바&page=2
+
+예시 2: 데이터 필터링사용자 목록에서 활성 상태($\text{status}$)인 사용자만 필터링할 때URL: /api/users?status=active
 # 다이어그램 확인 방법
 1. GitHub에서 보기
    파일을 커밋하고 GitHub에 푸시하면 Mermaid 다이어그램이 자동으로 렌더링됩니다.
@@ -12,6 +94,8 @@
 
 # 아키텍처 다이어그램 확인사이트
 https://mermaid.live/edit#pako:eNpVjbFugzAQhl_FuqmVSISdAImHSg1ps0Rqh0yFDCdwMEqwkTFKU-Dda4iqtjfd6fv-_zrIdC6Aw-mir5lEY8lhmyri5jmJpSkbW2FzJLPZU78TllRaiVtPNg87TRqp67pUxePd34wSibv9qAliZanOwx3FU_5NiZ5skz3WVtfHv-Rw1T15Scp36er_E2mES70mJ-QnnGVoSIxmUsCDwpQ5cGta4UElTIXjCd1IU7BSVCIF7tYczTmFVA0uU6P60Lr6iRndFhJc96VxV1vnaMW2xMLgryJULkysW2WBMzZVAO_gE_hixeZhGEQBXS9XfsSoBzfgYTiPoiDwQ0p9uvYpGzz4mn768xX1F8GC0WUUsZAxOnwDJDp1Uw
+
+https://mermaid.live
 
 # 확인사이트에서 이거 붙여 넣기 
 graph TB
@@ -315,3 +399,18 @@ AuditingFields에 있는 createdBy와 modifiedBy는 단지 String 타입의 기�
 
 게시글 소유권 확인: @LastModifiedBy나 @CreatedBy는 수정 권한을 확인하는 데 적합하지 않습니다. 예를 들어, 게시글을 수정하려 할 때, 
 현재 로그인한 사용자가 createdBy와 일치하는지 확인하는 로직을 직접 구현해야 하는데, 이 과정이 매우 번거롭고 안전하지 않습니다.
+
+# 채팅
+. 공동구매와 같이 게시글을 기반으로 다수의 인원이 소통해야 하는 경우에는 게시글 작성 완료 시 채팅방을 개설하도록 설계하는 것이 가장 효율적
+동구매 게시글을 작성하는 시점에 그룹 채팅방을 즉시 개설하는 설계는 매우 적절하며, 이를 위해 백엔드 API를 호출하는 로직을 handleSubmit 함수에 추가
+
+# 매우중요(******)
+stomphandler 하고 jwttokenprovider 에 key를 만드는 방식은 똑같이 해야
+JWT signature does not match... 에러가 안생긴다 
+
+생긴 이유: 토큰을 생성할 때 사용한 키와 검증할 때 사용한 키의 바이트 값이 달랐음.
+
+해결 방안 :키 문자열을 바이트로 변환할 때, 양쪽 모두 **Decoders.BASE64.decode(secretKey)**를 사용하여 키 처리 방식 일치.
+
+# 인텔리제이 업그레이드
+https://gustjr7532.tistory.com/80
