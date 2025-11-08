@@ -6,9 +6,7 @@ import com.example.altproject.dto.request.SignUpRequest;
 import com.example.altproject.dto.response.MemberResponse;
 import com.example.altproject.dto.response.SignInResponse;
 import com.example.altproject.dto.response.SignUpResponse;
-import com.example.altproject.repository.MemberRepository;
 import com.example.altproject.service.MemberService;
-import com.example.altproject.util.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository;
 
     @PostMapping("/signup")
     public ApiResponse<SignUpResponse> signUp(@RequestBody @Valid SignUpRequest request) {
