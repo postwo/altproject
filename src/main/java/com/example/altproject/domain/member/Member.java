@@ -1,6 +1,7 @@
 package com.example.altproject.domain.member;
 
 import com.example.altproject.domain.member.status.MemberRole;
+import com.example.altproject.domain.member.status.MemberStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -62,6 +63,9 @@ public class Member {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime modifiedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberStatus status;
 
     @Override
     public boolean equals(Object o) {
@@ -93,6 +97,7 @@ public class Member {
                 .email(email)
                 .password(encodedPassword)
                 .nickname(nickname)
+                .status(MemberStatus.ACTIVE)
                 .memberRoleList(new ArrayList<>(List.of(MemberRole.USER)))
                 .build();
     }
@@ -102,6 +107,7 @@ public class Member {
                 .email(email)
                 .nickname(nickname)
                 .password(null)
+                .status(MemberStatus.ACTIVE)
                 .socialUsername(socialUsername)
                 .memberRoleList(new ArrayList<>(List.of(MemberRole.USER)))
                 .social(true)
