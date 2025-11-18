@@ -37,6 +37,7 @@ public class ChatMessage   {
     @Column(nullable = false, length = 500)
     private String content;
 
+    @Builder.Default
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ReadStatus> readStatuses = new ArrayList<>();
 
