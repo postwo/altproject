@@ -5,6 +5,7 @@ import com.example.altproject.common.api.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,5 +29,13 @@ public class GlobalExceptionHandler {
         log.error("VALIDATION EXCEPTION 발생 : ",ex);
 
         return ResponseEntity.status(ErrorStatus.VALIDATION_FAIL.getHttpStatus()).body(ApiResponse.ValidationException());
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<?>> handleLockedException(LockedException ex) {
+        log.warn("LOCKED EXCEPTION 발생 : {}", ex.getMessage());
+
+        return ResponseEntity.status(ErrorStatus.AUTHORIZATION_FAIL.getHttpStatus())
+                .body(ApiResponse.lockedError(ex.getMessage()));
     }
 }

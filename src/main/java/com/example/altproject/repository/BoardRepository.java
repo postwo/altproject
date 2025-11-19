@@ -22,4 +22,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     List<Board> findByWriterEmailOrderByCreatedAtDesc(String email);
 
     List<Board> findByTitleIn(List<String> titles);
+
+    long countByWriterEmail(String email);
 }

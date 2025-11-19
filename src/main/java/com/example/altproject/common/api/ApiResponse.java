@@ -35,6 +35,17 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static ApiResponse<?> lockedError(String message) {
+        var errorStatus = ErrorStatus.VALIDATION_FAIL;
+
+        return ApiResponse.builder()
+                .code(errorStatus.getCode())
+                .message(message)
+                .status(errorStatus.getHttpStatus())
+                .build();
+    }
+
+
     public static ApiResponse<?> ApiError(ApiException apiException) {
 
         var errorStatus = apiException.getErrorStatus();
@@ -61,5 +72,4 @@ public class ApiResponse<T> {
                 .status(errorStatus.getHttpStatus())
                 .build();
     }
-
 }

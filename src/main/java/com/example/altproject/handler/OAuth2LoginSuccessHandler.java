@@ -3,6 +3,7 @@ package com.example.altproject.handler;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.member.Member;
+import com.example.altproject.domain.member.status.MemberStatus;
 import com.example.altproject.repository.MemberRepository;
 import com.example.altproject.service.oauth.CustomOAuth2User;
 import com.example.altproject.util.JwtTokenProvider;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -58,6 +61,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER,"사용자 없음"));
+
+        // oauth 로그인 정지 유저이면 url로 메시지를 같이 보내진다
+        if (member.getStatus() == MemberStatus.SUSPENDED) {
+            String errorMessage = "정지된 사용자입니다. 관리자에게 문의해주세요.";
+            String encodedMessage = java.net.URLEncoder.encode(errorMessage, "UTF-8");
+            String errorUrl = "http://localhost:5173/oauth/callback?error=account_suspended&message=" + encodedMessage;
+            response.sendRedirect(errorUrl);
+            return;
+        }
 
         List<String> roles = member.getMemberRoleList().stream()
                 .map(Enum::name)

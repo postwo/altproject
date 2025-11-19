@@ -4,6 +4,7 @@ import com.example.altproject.common.AuthUtil;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.member.Member;
+import com.example.altproject.domain.member.status.MemberStatus;
 import com.example.altproject.dto.request.SignInRequest;
 import com.example.altproject.dto.request.SignUpRequest;
 import com.example.altproject.dto.response.MemberResponse;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,11 @@ public class MemberServiceImplement implements MemberService {
     @Transactional
     public SignInResponse login(SignInRequest request) {
         Member user = memberRepository.getWithRoles(request.getEmail()).orElseThrow(()->new ApiException(ErrorStatus.NOT_EXISTED_USER));
+
+        // 계정이 정지 상태인지 확인
+        if (user.getStatus() == MemberStatus.SUSPENDED) {
+            throw new LockedException("계정이 정지되었습니다. 관리자에게 문의하세요.");
+        }
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ApiException(ErrorStatus.PASSWORD_MISMATCH);
@@ -151,4 +158,3 @@ public class MemberServiceImplement implements MemberService {
 
 
 }
-

@@ -3,10 +3,12 @@ package com.example.altproject.service.oauth;
 import com.example.altproject.common.ErrorStatus;
 import com.example.altproject.common.exception.ApiException;
 import com.example.altproject.domain.member.Member;
+import com.example.altproject.domain.member.status.MemberStatus;
 import com.example.altproject.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -64,6 +66,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(ErrorStatus.NOT_EXISTED_USER, "사용자가 존재하지 않습니다."));
+
+        // 사용자 상태 확인 추가
+//        if (member.getStatus() == MemberStatus.SUSPENDED) {
+////            throw new ApiException(ErrorStatus.AUTHORIZATION_FAIL, "정지된 사용자입니다. 관리자에게 문의해주세요.");
+//            throw new LockedException("정지된 사용자입니다. 관리자에게 문의해주세요.");
+//        }
+
 
         List<GrantedAuthority> authorities = member.getMemberRoleList().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))

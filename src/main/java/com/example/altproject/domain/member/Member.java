@@ -114,5 +114,11 @@ public class Member {
                 .build();
     }
 
+    public void suspend() {
+        this.status = MemberStatus.SUSPENDED;
+    }
 
+    public void activate() {
+        this.status = MemberStatus.ACTIVE;
+    }
 }
