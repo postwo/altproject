@@ -49,11 +49,11 @@ public class ChatController {
     }
 
 //    채팅메시지 읽음처리
-    @PostMapping("/room/{roomId}/read")
-    public ResponseEntity<?> messageRead(@PathVariable Long roomId){
-        chatService.messageRead(roomId);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/room/{roomId}/read")
+//    public ResponseEntity<?> messageRead(@PathVariable Long roomId){
+//        chatService.messageRead(roomId);
+//        return ResponseEntity.ok().build();
+//    }
 
 //    내채팅방목록조회 : roomId, roomName, 그룹채팅여부, 메시지읽음개수
     @GetMapping("/my/rooms")
