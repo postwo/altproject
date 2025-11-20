@@ -13,7 +13,7 @@ import java.util.*;
 @Getter
 @Entity
 @Builder
-@ToString(callSuper = true)
+@ToString(callSuper = true) // reports added via @ToString.Exclude
 @Table(indexes = {
         @Index(columnList = "title")
 })
@@ -44,7 +44,6 @@ public class Board extends AuditingFields {
     private String writerEmail;
 
     @Setter
-//    @Transient  // DB에 매핑되지 않는 필드
     private boolean isLiked;
 
     @Builder.Default
@@ -57,11 +56,16 @@ public class Board extends AuditingFields {
     @ManyToMany(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<HashTag> hashtags = new LinkedHashSet<>();
 
-    //orphanRemoval 부모 엔티티(게시글)는 그대로 남겨둔 채, 부모와의 관계가 끊어진 자식 엔티티(이미지)만 데이터베이스에서 삭제할 때 사용
     @Builder.Default
     @ToString.Exclude
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
+
+    // BoardReport와의 1:N 관계 추가
+    @Builder.Default
+    @ToString.Exclude
+    @OneToMany(mappedBy = "reportedBoard", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardReport> reports = new ArrayList<>();
 
 
     public void increaseViewCount() {
