@@ -16,6 +16,8 @@ import com.example.altproject.repository.BoardRepository;
 import com.example.altproject.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -33,7 +36,6 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ReadStatusRepository readStatusRepository;
     private final MemberRepository memberRepository;
-    private final BoardRepository boardRepository;
 
 
     public void saveMessage(Long roomId, ChatMessageDto chatMessageReqDto){
@@ -199,6 +201,51 @@ public class ChatService {
             chatRoomRepository.delete(chatRoom);
         }
     }
+
+
+
+    /**
+     * 특정 채팅방의 이전 대화내용을 페이징하여 가져온다.
+     * @param roomId 채팅방 ID
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지당 메시지 수
+     * @return 메시지 DTO 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getPreviousMessages(Long roomId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ChatMessage> messages = chatMessageRepository.findByChatRoomIdOrderByIdDesc(roomId, pageable);
+
+        return messages.stream()
+                .map(message -> {
+                    // ChatMessageDto의 빌더를 사용하여 안전하게 객체 생성
+                    return ChatMessageDto.builder()
+                            .roomId(message.getChatRoom().getId())
+                            .senderEmail(message.getMember().getEmail()) // getSender() -> getMember().getEmail()
+                            .message(message.getContent()) // getMessage() -> getContent()
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자가 마지막으로 읽은 메시지 이후에 온 읽지 않은 메시지 수를 계산한다.
+     * @param roomId 채팅방 ID
+     * @param lastMessageId 사용자가 마지막으로 읽은 메시지의 ID
+     * @return 읽지 않은 메시지 수
+     */
+    @Transactional(readOnly = true)
+    public long getUnreadMessageCount(Long roomId, Long lastMessageId) {
+        if (lastMessageId == null || lastMessageId == 0) {
+            // 사용자가 방에 처음 들어왔거나, 읽은 기록이 없는 경우 모든 메시지를 카운트할 수 있으나,
+            // 클라이언트에서 관리하는 것이 더 효율적이므로 0을 반환하거나 초기 메시지 수를 제한할 수 있다.
+            // 여기서는 lastMessageId가 있어야만 카운트하도록 가정한다.
+            return chatMessageRepository.countByChatRoomIdAndIdGreaterThan(roomId, 0L);
+        }
+        return chatMessageRepository.countByChatRoomIdAndIdGreaterThan(roomId, lastMessageId);
+    }
+
+
 
 //    public Long getOrCreatePrivateRoom(Long otherMemberId){
 //        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException("member cannot be found"));

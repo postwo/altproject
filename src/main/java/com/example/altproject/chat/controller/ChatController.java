@@ -75,4 +75,35 @@ public class ChatController {
 //        Long roomId = chatService.getOrCreatePrivateRoom(otherMemberId);
 //        return new ResponseEntity<>(roomId, HttpStatus.OK);
 //    }
+
+
+    /**
+     * 채팅방의 이전 메시지들을 조회합니다. (스크롤을 위로 올릴 때 사용)
+     * @param roomId 채팅방 ID
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 한 페이지에 가져올 메시지 수
+     * @return 메시지 목록
+     */
+    @GetMapping("/rooms/{roomId}/messages")
+    public ResponseEntity<List<ChatMessageDto>> getPreviousMessages(
+            @PathVariable Long roomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<ChatMessageDto> messages = chatService.getPreviousMessages(roomId, page, size);
+        return ResponseEntity.ok(messages);
+    }
+
+    /**
+     * 읽지 않은 메시지 수를 조회합니다. (채팅방 목록 뱃지에 사용)
+     * @param roomId 채팅방 ID
+     * @param lastMessageId 클라이언트가 마지막으로 읽은 메시지 ID
+     * @return 읽지 않은 메시지 수
+     */
+    @GetMapping("/rooms/{roomId}/messages/unread-count")
+    public ResponseEntity<Long> getUnreadMessageCount(
+            @PathVariable Long roomId,
+            @RequestParam Long lastMessageId) {
+        long count = chatService.getUnreadMessageCount(roomId, lastMessageId);
+        return ResponseEntity.ok(count);
+    }
 }
