@@ -17,5 +17,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     // 특정 채팅방에서 lastMessageId보다 큰 ID를 가진 메시지 수 카운트 (읽지 않은 메시지 수)
     long countByChatRoomIdAndIdGreaterThan(Long chatRoomId, Long lastMessageId);
+
 }
 

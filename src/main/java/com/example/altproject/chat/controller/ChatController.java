@@ -15,67 +15,52 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/api/chat") // ⬇️ [수정] 경로 일관성을 위해 /api 추가
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
 
 //    그룹채팅방 개설
     @PostMapping("/room/group/create")
-    public ResponseEntity<?> createGroupRoom(@RequestParam String roomName){
-        chatService.createGroupRoom(roomName);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Long> createGroupRoom(@RequestParam String roomName){
+        Long roomId = chatService.createGroupRoom(roomName);
+        return ResponseEntity.ok(roomId);
     }
 
 //    그룹채팅목록조회
     @GetMapping("/room/group/list")
-    public ResponseEntity<?> getGroupChatRooms(){
+    public ResponseEntity<List<ChatRoomListResDto>> getGroupChatRooms(){
         List<ChatRoomListResDto> chatRooms = chatService.getGroupchatRooms();
         return new ResponseEntity<>(chatRooms, HttpStatus.OK);
     }
 
 //    그룹채팅방참여
     @PostMapping("/room/group/{roomId}/join")
-    public ResponseEntity<?> joinGroupChatRoom(@PathVariable Long roomId){
+    public ResponseEntity<Void> joinGroupChatRoom(@PathVariable Long roomId){
         chatService.addParticipantToGroupChat(roomId);
         return ResponseEntity.ok().build();
     }
 
-//    이전 메시지 조회
-    @GetMapping("/history/{roomId}")
-    public ResponseEntity<?> getChatHistory(@PathVariable Long roomId){
-        List<ChatMessageDto> chatMessageDtos = chatService.getChatHistory(roomId);
-        return new ResponseEntity<>(chatMessageDtos, HttpStatus.OK);
-    }
-
 //    채팅메시지 읽음처리
-//    @PostMapping("/room/{roomId}/read")
-//    public ResponseEntity<?> messageRead(@PathVariable Long roomId){
-//        chatService.messageRead(roomId);
-//        return ResponseEntity.ok().build();
-//    }
+    @PutMapping("/rooms/{roomId}/read")
+    public ResponseEntity<Void> messageRead(@PathVariable Long roomId){
+        chatService.messageRead(roomId);
+        return ResponseEntity.ok().build();
+    }
 
 //    내채팅방목록조회 : roomId, roomName, 그룹채팅여부, 메시지읽음개수
     @GetMapping("/my/rooms")
-    public ResponseEntity<?> getMyChatRooms(){
+    public ResponseEntity<List<MyChatListResDto>> getMyChatRooms(){
         List<MyChatListResDto> myChatListResDtos = chatService.getMyChatRooms();
         return new ResponseEntity<>(myChatListResDtos, HttpStatus.OK);
     }
 
 //    채팅방 나가기
     @DeleteMapping("/room/group/{roomId}/leave")
-    public ResponseEntity<?> leaveGroupChatRoom(@PathVariable Long roomId){
+    public ResponseEntity<Void> leaveGroupChatRoom(@PathVariable Long roomId){
         chatService.leaveGroupChatRoom(roomId);
         return ResponseEntity.ok().build();
     }
-
-//    개인 채팅방 개설 또는 기존roomId return
-//    @PostMapping("/room/private/create")
-//    public ResponseEntity<?> getOrCreatePrivateRoom(@RequestParam Long otherMemberId){
-//        Long roomId = chatService.getOrCreatePrivateRoom(otherMemberId);
-//        return new ResponseEntity<>(roomId, HttpStatus.OK);
-//    }
-
 
     /**
      * 채팅방의 이전 메시지들을 조회합니다. (스크롤을 위로 올릴 때 사용)
@@ -93,17 +78,10 @@ public class ChatController {
         return ResponseEntity.ok(messages);
     }
 
-    /**
-     * 읽지 않은 메시지 수를 조회합니다. (채팅방 목록 뱃지에 사용)
-     * @param roomId 채팅방 ID
-     * @param lastMessageId 클라이언트가 마지막으로 읽은 메시지 ID
-     * @return 읽지 않은 메시지 수
-     */
-    @GetMapping("/rooms/{roomId}/messages/unread-count")
-    public ResponseEntity<Long> getUnreadMessageCount(
-            @PathVariable Long roomId,
-            @RequestParam Long lastMessageId) {
-        long count = chatService.getUnreadMessageCount(roomId, lastMessageId);
+    // ⬇️ [추가] 로그인한 사용자의 전체 안 읽은 메시지 수를 조회 (헤더 알림 뱃지용)
+    @GetMapping("/notifications/unread-count")
+    public ResponseEntity<Long> getTotalUnreadMessageCount() {
+        long count = chatService.getTotalUnreadMessageCount();
         return ResponseEntity.ok(count);
     }
 }

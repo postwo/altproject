@@ -23,4 +23,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     List<ChatParticipant> findByMember(Member member);
 
     long countByMember(Member member);
+
+    // ⬇️ [추가] 특정 채팅방에 특정 멤버가 존재하는지 여부만 확인하는 효율적인 쿼리
+    boolean existsByChatRoomAndMember(ChatRoom chatRoom, Member member);
 }
