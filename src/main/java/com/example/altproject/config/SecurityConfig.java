@@ -44,7 +44,7 @@ public class SecurityConfig {
                         // ⭐️ STOMP 엔드포인트 경로를 명시적으로 허용합니다. (SockJS 경로 포함)
                         .requestMatchers("/connect/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/private/**","/chat/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/private/**","api/chat/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().denyAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 

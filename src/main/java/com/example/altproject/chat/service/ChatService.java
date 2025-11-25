@@ -11,10 +11,13 @@ import com.example.altproject.chat.repository.ChatMessageRepository;
 import com.example.altproject.chat.repository.ChatParticipantRepository;
 import com.example.altproject.chat.repository.ChatRoomRepository;
 import com.example.altproject.chat.repository.ReadStatusRepository;
+import com.example.altproject.domain.board.Board;
 import com.example.altproject.domain.member.Member;
+import com.example.altproject.repository.BoardRepository;
 import com.example.altproject.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ReadStatusRepository readStatusRepository;
     private final MemberRepository memberRepository;
+    private final BoardRepository boardRepository;
 
 
     @Transactional
@@ -64,12 +69,13 @@ public class ChatService {
         readStatusRepository.saveAll(readStatusesToSave);
     }
 
-    public Long createGroupRoom(String chatRoomName){
+    public Long createGroupRoom(String chatRoomName,Long boardId){
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException("member cannot be found"));
-
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new EntityNotFoundException("board cannot be found"));
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(chatRoomName)
                 .isGroupChat("Y")
+                .board(board)
                 .build();
         chatRoomRepository.save(chatRoom);
         ChatParticipant chatParticipant = ChatParticipant.builder()
@@ -78,6 +84,7 @@ public class ChatService {
                 .build();
         chatParticipantRepository.save(chatParticipant);
 
+        log.info("방 개설 완료 ");
         return chatRoom.getId();
     }
 
@@ -153,6 +160,7 @@ public class ChatService {
                         .roomName(chatRoom.getName())
                         .isGroupChat(chatRoom.getIsGroupChat())
                         .unReadCount(unreadCounts.getOrDefault(chatRoom, 0L))
+                        .boardId(chatRoom.getBoard() != null ? chatRoom.getBoard().getId() : null)
                         .build())
                 .collect(Collectors.toList());
     }
