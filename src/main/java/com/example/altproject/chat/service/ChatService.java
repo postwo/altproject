@@ -180,22 +180,27 @@ public class ChatService {
         }
     }
 
+    /**
+     * 채팅방의 모든 메시지를 조회합니다.
+     * @param roomId 채팅방 ID
+     * @return 메시지 목록
+     */
     @Transactional(readOnly = true)
-    public List<ChatMessageDto> getPreviousMessages(Long roomId, int page, int size) {
+    public List<ChatMessageDto> getAllMessages(Long roomId) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (!isRoomPaticipant(userEmail, roomId)) {
             throw new IllegalArgumentException("본인이 속하지 않은 채팅방입니다.");
         }
 
-        Pageable pageable = PageRequest.of(page, size);
-        List<ChatMessage> messages = chatMessageRepository.findByChatRoomIdOrderByIdDesc(roomId, pageable);
+        List<ChatMessage> messages = chatMessageRepository.findByChatRoomIdOrderByIdAsc(roomId);
 
         return messages.stream()
                 .map(message -> ChatMessageDto.builder()
                         .roomId(message.getChatRoom().getId())
                         .senderEmail(message.getMember().getEmail())
                         .message(message.getContent())
+                        .createdAt(message.getCreatedAt()) // createdAt 필드 추가
                         .build())
                 .collect(Collectors.toList());
     }

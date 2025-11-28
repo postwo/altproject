@@ -63,18 +63,14 @@ public class ChatController {
     }
 
     /**
-     * 채팅방의 이전 메시지들을 조회합니다. (스크롤을 위로 올릴 때 사용)
+     * 채팅방의 모든 메시지를 조회합니다.
      * @param roomId 채팅방 ID
-     * @param page 페이지 번호 (0부터 시작)
-     * @param size 한 페이지에 가져올 메시지 수
      * @return 메시지 목록
      */
     @GetMapping("/rooms/{roomId}/messages")
-    public ResponseEntity<List<ChatMessageDto>> getPreviousMessages(
-            @PathVariable Long roomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        List<ChatMessageDto> messages = chatService.getPreviousMessages(roomId, page, size);
+    public ResponseEntity<List<ChatMessageDto>> getAllMessages(
+            @PathVariable Long roomId) {
+        List<ChatMessageDto> messages = chatService.getAllMessages(roomId);
         return ResponseEntity.ok(messages);
     }
 
